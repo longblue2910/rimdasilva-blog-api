@@ -139,7 +139,7 @@ public static class ServiceExtensions
 
         app.UseSwagger();
 
-        if (app.Environment.IsDevelopment())
+        if (/*app.Environment.IsDevelopment()*/ true)
         {
             app.UseSwaggerUI(setup =>
             {
