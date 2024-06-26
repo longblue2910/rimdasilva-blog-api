@@ -10,7 +10,7 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
     {
         if (!context.Users.Any())
         {
-            context.BulkInsert(GetUsers());
+            context.Users.AddRange(GetUsers());
         }
 
         await context.SaveChangesAsync();
@@ -21,8 +21,7 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
         [
             new()
             {
-                FirstName = "System",
-                LastName = "Admin",
+                FullName = "Admin",
                 Password = "admin",
                 Username = "admin",
                 Phone = "0983336103",
@@ -32,9 +31,8 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
             },
             new()
             {
-                FirstName = "Long",
-                LastName = "Jr",
-                Username = "admin",
+                FullName = "Long Phan",
+                Username = "longjr",
                 Password = "longjr",
                 Phone = "0983336104",
                 Email = "long.jr@rimdasilva.com",

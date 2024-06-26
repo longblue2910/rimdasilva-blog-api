@@ -12,7 +12,7 @@ using Post.Infrastructure;
 namespace Post.Infrastructure.Migrations
 {
     [DbContext(typeof(PostDbContext))]
-    [Migration("20240625084404_InitDatabase")]
+    [Migration("20240626070935_InitDatabase")]
     partial class InitDatabase
     {
         /// <inheritdoc />
@@ -43,14 +43,14 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 25, 15, 44, 4, 430, DateTimeKind.Local).AddTicks(9146));
+                        .HasDefaultValue(new DateTime(2024, 6, 26, 14, 9, 34, 590, DateTimeKind.Local).AddTicks(4815));
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("FirstName")
+                    b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -65,11 +65,6 @@ namespace Post.Infrastructure.Migrations
 
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");

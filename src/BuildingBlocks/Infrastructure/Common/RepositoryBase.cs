@@ -82,6 +82,7 @@ public class RepositoryBase<TEntity, TContext> : RepositoryQueryBase<TEntity, TC
 
         TEntity exist = _dbContext.Set<TEntity>().Find(id);
         _dbContext.Entry(exist).CurrentValues.SetValues(entity);
+
         await SaveChangesAsync();
     }
 

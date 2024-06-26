@@ -1,6 +1,10 @@
+using Asp.Versioning.ApiExplorer;
+using Asp.Versioning;
 using Microsoft.Extensions.FileProviders;
+using Post.Api.Apis;
 using Post.Api.Extensions;
 using Post.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,10 +19,27 @@ builder.Services.AddJwtAuthentication();
 
 builder.Services.ConfigureCors(builder.Configuration);
 
-var app = builder.Build();
+//builder.Services.AddApiVersioning(options =>
+//{
+//    options.AssumeDefaultVersionWhenUnspecified = true;
+//    options.DefaultApiVersion = new ApiVersion(1, 0);
+//    options.ReportApiVersions = true;
+//});
 
-app.UseSwagger();
-app.UseSwaggerUI();
+
+var withApiVersioning = builder.Services.AddApiVersioning();
+
+builder.AddDefaultOpenApi(withApiVersioning);
+
+//builder.Services.AddVersionedApiExplorer(options =>
+//{
+//    options.GroupNameFormat = "'v'VVV";
+//    options.SubstituteApiVersionInUrl = true;
+//});
+
+//builder.AddDefaultOpenApi(builder.Services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>());
+
+var app = builder.Build();
 
 app.UseHttpsRedirection();
 
@@ -36,6 +57,17 @@ app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+//app.MapControllers();
+
+var posts = app.NewVersionedApi("Posts");
+posts.MapOrdersApiV1()
+    .RequireAuthorization();
+posts.MapOrdersApiV2()
+    .RequireAuthorization();
+
+
+
+app.UseDefaultOpenApi();
+
 
 app.Run();

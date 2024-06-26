@@ -1,8 +1,12 @@
 ﻿using Contracts.Common.Interfaces;
+using Contracts.Interfaces;
 using Infrastructure.Common;
+using Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Post.Domain.AggregatesModel.UserAggregate;
+using Post.Infrastructure.Repositories;
 
 namespace Post.Infrastructure;
 
@@ -16,8 +20,10 @@ public static class ConfigureServices
                 builder => builder.MigrationsAssembly(typeof(PostDbContext).Assembly.FullName));
         });
 
-        //services.AddTransient<ITokenService, TokenService>();
-        //services.AddScoped<IUserRepository, UserRepository>();
+
+
+        services.AddTransient<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IUserRepository, UserRepository>();
         //services.AddScoped<ITrackRepository, TrackRepository>();
 
         services.AddScoped(typeof(IRepositoryBaseAsync<,>), typeof(RepositoryBase<,>));
