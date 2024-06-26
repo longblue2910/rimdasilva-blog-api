@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Post.Api.Applications.Commands.User;
+using Post.Api.Applications.Queries.Category;
+using Post.Domain.AggregatesModel.CategoryAggregate;
 
 namespace Post.Api.Apis;
 
@@ -10,7 +12,10 @@ public static class PostsApi
     public static RouteGroupBuilder MapOrdersApiV1(this IEndpointRouteBuilder app)
     {
         var api = app.MapGroup("api/posts").HasApiVersion(1.0);
-        api.MapPost("/", CreateUserAsync);
+
+        api.MapPost("/user", CreateUserAsync);
+
+        api.MapGet("/category", GetsCategoryAsync);
 
         return api;
     }
@@ -18,7 +23,7 @@ public static class PostsApi
     public static RouteGroupBuilder MapOrdersApiV2(this IEndpointRouteBuilder app)
     {
         var api = app.MapGroup("api/posts").HasApiVersion(2.0);
-        api.MapPost("/", CreateUserAsync);
+        api.MapPost("/", GetsCategoryAsync);
 
 
         return api;
@@ -57,7 +62,14 @@ public static class PostsApi
         }
 
         return TypedResults.Ok();
+    }
 
+    public static async Task<Ok<List<Category>>> GetsCategoryAsync([AsParameters] PostServices services)
+    {
+        var query = new GetsCategoryQuery {};
+        var result = await services.Mediator.Send(query);
+
+        return TypedResults.Ok(result);
     }
 }
 

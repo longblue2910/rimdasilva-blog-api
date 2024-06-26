@@ -60,9 +60,9 @@ app.UseAuthorization();
 //app.MapControllers();
 
 var posts = app.NewVersionedApi("Posts");
-posts.MapOrdersApiV1()
-    .RequireAuthorization();
-posts.MapOrdersApiV2()
+posts.MapOrdersApiV1();
+
+  posts.MapOrdersApiV2()
     .RequireAuthorization();
 
 

@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.UserAggregate;
 using Post.Infrastructure.EntityConfigurations;
+using Post.Infrastructure.Repositories;
 using System.Data;
 
 namespace Post.Infrastructure;
@@ -9,6 +11,7 @@ namespace Post.Infrastructure;
 public class PostDbContext : DbContext
 {
     public DbSet<User> Users { get; set; }
+    public DbSet<Category> Categories { get; set; }
 
     private IDbContextTransaction _currentTransaction;
     public PostDbContext(DbContextOptions<PostDbContext> options) : base(options) { }
@@ -20,6 +23,7 @@ public class PostDbContext : DbContext
     {
         modelBuilder.HasDefaultSchema("post"); 
         modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new CategoryEntityConfiguration());
     }
 
     public async Task<IDbContextTransaction> BeginTransactionAsync()

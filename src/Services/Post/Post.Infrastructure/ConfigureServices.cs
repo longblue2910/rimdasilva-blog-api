@@ -5,6 +5,7 @@ using Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.UserAggregate;
 using Post.Infrastructure.Repositories;
 
@@ -20,11 +21,10 @@ public static class ConfigureServices
                 builder => builder.MigrationsAssembly(typeof(PostDbContext).Assembly.FullName));
         });
 
-
-
         services.AddTransient<IPasswordHasher, PasswordHasher>();
+
         services.AddScoped<IUserRepository, UserRepository>();
-        //services.AddScoped<ITrackRepository, TrackRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
 
         services.AddScoped(typeof(IRepositoryBaseAsync<,>), typeof(RepositoryBase<,>));
         services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
