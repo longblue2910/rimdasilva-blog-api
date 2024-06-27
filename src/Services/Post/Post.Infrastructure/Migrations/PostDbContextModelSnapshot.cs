@@ -169,7 +169,7 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 27, 16, 46, 59, 836, DateTimeKind.Local).AddTicks(2533));
+                        .HasDefaultValue(new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(536));
 
                     b.Property<string>("ImgUrl")
                         .HasColumnType("nvarchar(max)");
@@ -217,7 +217,7 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 27, 16, 46, 59, 836, DateTimeKind.Local).AddTicks(5377));
+                        .HasDefaultValue(new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(4967));
 
                     b.Property<bool?>("IsDelete")
                         .ValueGeneratedOnAdd()
@@ -256,7 +256,7 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 27, 16, 46, 59, 836, DateTimeKind.Local).AddTicks(3967));
+                        .HasDefaultValue(new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(2860));
 
                     b.Property<string>("Description")
                         .HasColumnType("NVARCHAR(MAX)");
