@@ -1,17 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Post.Domain.AggregatesModel.CategoryAggregate;
+using Post.Domain.AggregatesModel.CommentAggregate;
 using Post.Domain.AggregatesModel.UserAggregate;
 using Post.Infrastructure.EntityConfigurations;
-using Post.Infrastructure.Repositories;
 using System.Data;
 
 namespace Post.Infrastructure;
 
-public class PostDbContext : DbContext
+public class PostDbContext : IdentityDbContext<ApplicationUser>
 {
-    public DbSet<User> Users { get; set; }
     public DbSet<Category> Categories { get; set; }
+    public DbSet<Comment> Comments { get; set; }
+    public DbSet<Domain.AggregatesModel.PostAggregate.Post> Posts { get; set; }
 
     private IDbContextTransaction _currentTransaction;
     public PostDbContext(DbContextOptions<PostDbContext> options) : base(options) { }
@@ -24,6 +26,11 @@ public class PostDbContext : DbContext
         modelBuilder.HasDefaultSchema("post"); 
         modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
         modelBuilder.ApplyConfiguration(new CategoryEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new PostEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new CommentEntityConfiguration());
+
+        base.OnModelCreating(modelBuilder);
+
     }
 
     public async Task<IDbContextTransaction> BeginTransactionAsync()

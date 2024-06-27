@@ -1,0 +1,6 @@
+- Migration commands:
+	- Open Developer PowerShell
+	- Enter `cd src\Services\Identity`
+	- Add Migration: `dotnet ef migrations add "InitDatabase" -p Identity.Api --startup-project Identity.Api -o Migrations`
+	- Remove Migration: `dotnet ef migrations remove --project Identity.Api --startup-project Identity.Api`
+	- Update Database: `dotnet ef database update -p Identity.Api --startup-project Identity.Api`

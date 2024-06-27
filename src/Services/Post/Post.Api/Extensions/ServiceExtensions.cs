@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Post.Api.Application.Behaviors;
+using Post.Api.Applications.Queries.Post;
 using Post.Api.Infrastructure;
 using Post.Infrastructure;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -43,6 +44,8 @@ public static class ServiceExtensions
             cfg.AddOpenBehavior(typeof(ValidatorBehavior<,>));
             cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
         });
+
+        services.AddScoped<IPostQueries, PostQueries>();
     }
 
     internal static void AddConfigurationSettings(this IServiceCollection services,

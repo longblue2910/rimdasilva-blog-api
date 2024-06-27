@@ -1,15 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Post.Domain.AggregatesModel.CategoryAggregate;
+using Post.Domain.AggregatesModel.CommentAggregate;
 
 namespace Post.Infrastructure.EntityConfigurations;
 
-public class CategoryEntityConfiguration : IEntityTypeConfiguration<Category>
+public class CommentEntityConfiguration : IEntityTypeConfiguration<Comment>
 {
-    public void Configure(EntityTypeBuilder<Category> builder)
+    public void Configure(EntityTypeBuilder<Comment> builder)
     {
         builder
-            .ToTable("Categories");
+            .ToTable("Comments");
 
         builder
             .HasKey(x => x.Id);
@@ -17,12 +17,17 @@ public class CategoryEntityConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(x => x.Id)
             .HasDefaultValueSql("NEWID()");
 
+
         builder.Property(x => x.IsDelete)
                 .HasDefaultValue(false);
 
         builder.Property(x => x.CreatedDate)
                 .HasDefaultValue(DateTime.Now);
 
-
+        builder
+            .HasOne(c => c.Post)
+            .WithMany(p => p.Comments)
+            .HasForeignKey(c => c.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

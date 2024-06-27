@@ -2,9 +2,9 @@
 
 public interface IUserRepository
 {
-    Task<User> Add(User user);
-    Task Update(User user);
-    Task<User> FindByIdAsync(Guid id);
+    Task<ApplicationUser> Add(ApplicationUser user);
+    Task Update(ApplicationUser user);
+    Task<ApplicationUser> FindByIdAsync(string id);
 
     /// <summary>
     /// Kiểm tra xem người dùng đã tồn tại hay chưa

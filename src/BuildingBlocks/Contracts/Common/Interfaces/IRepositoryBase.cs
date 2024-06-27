@@ -20,8 +20,8 @@ public interface IRepositoryBaseAsync<TEntity, TContext> : IRepositoryQueryBase<
     Task CreateAsync(TEntity entity);
     Task CreateList(IEnumerable<TEntity> entities);
     Task CreateListAsync(IEnumerable<TEntity> entities);
-    void Update(TEntity entity, Guid id);
-    Task UpdateAsync(TEntity entity, Guid id);
+    void Update(TEntity entity, string id);
+    Task UpdateAsync(TEntity entity, string id);
     void UpdateList(IEnumerable<TEntity> entities);
     Task UpdateListAsync(IEnumerable<TEntity> entities);
     void Delete(TEntity entity);

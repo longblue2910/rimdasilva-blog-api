@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Post.Infrastructure;
 
@@ -11,9 +12,11 @@ using Post.Infrastructure;
 namespace Post.Infrastructure.Migrations
 {
     [DbContext(typeof(PostDbContext))]
-    partial class PostDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240627082913_InitDatabase")]
+    partial class InitDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -169,7 +172,7 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 27, 16, 46, 59, 836, DateTimeKind.Local).AddTicks(2533));
+                        .HasDefaultValue(new DateTime(2024, 6, 27, 15, 29, 12, 809, DateTimeKind.Local).AddTicks(5495));
 
                     b.Property<string>("ImgUrl")
                         .HasColumnType("nvarchar(max)");
@@ -217,7 +220,7 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 27, 16, 46, 59, 836, DateTimeKind.Local).AddTicks(5377));
+                        .HasDefaultValue(new DateTime(2024, 6, 27, 15, 29, 12, 809, DateTimeKind.Local).AddTicks(8277));
 
                     b.Property<bool?>("IsDelete")
                         .ValueGeneratedOnAdd()
@@ -256,7 +259,7 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 27, 16, 46, 59, 836, DateTimeKind.Local).AddTicks(3967));
+                        .HasDefaultValue(new DateTime(2024, 6, 27, 15, 29, 12, 809, DateTimeKind.Local).AddTicks(6883));
 
                     b.Property<string>("Description")
                         .HasColumnType("NVARCHAR(MAX)");
@@ -275,9 +278,6 @@ namespace Post.Infrastructure.Migrations
 
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Slug")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()

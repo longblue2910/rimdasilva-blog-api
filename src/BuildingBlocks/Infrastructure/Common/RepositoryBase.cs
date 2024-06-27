@@ -70,13 +70,13 @@ public class RepositoryBase<TEntity, TContext> : RepositoryQueryBase<TEntity, TC
 
     public Task<int> SaveChangesAsync() => _unitOfWork.CommitAsync();
 
-    public void Update(TEntity entity, Guid id)
+    public void Update(TEntity entity, string id)
     {
         TEntity exist = _dbContext.Set<TEntity>().Find(id);
         _dbContext.Entry(exist).CurrentValues.SetValues(entity);
     }
 
-    public async Task UpdateAsync(TEntity entity, Guid id)
+    public async Task UpdateAsync(TEntity entity, string id)
     {
         if (_dbContext.Entry(entity).State == EntityState.Unchanged) return;
 

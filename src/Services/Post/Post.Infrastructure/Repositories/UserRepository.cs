@@ -1,37 +1,35 @@
 ﻿using Contracts.Common.Interfaces;
-using Contracts.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Post.Domain.AggregatesModel.UserAggregate;
 
 namespace Post.Infrastructure.Repositories;
 
-public class UserRepository(IRepositoryBaseAsync<User, PostDbContext> repositoryBaseAsync,
-    IUnitOfWork<PostDbContext> unitOfWork, 
-    IPasswordHasher passwordHasher) : IUserRepository
+public class UserRepository(IRepositoryBaseAsync<ApplicationUser, PostDbContext> repositoryBaseAsync,
+    IUnitOfWork<PostDbContext> unitOfWork,
+    UserManager<ApplicationUser> userManager) : IUserRepository
 {
-    private readonly IRepositoryBaseAsync<User, PostDbContext> _repositoryBaseAsync = repositoryBaseAsync;
+    private readonly IRepositoryBaseAsync<ApplicationUser, PostDbContext> _repositoryBaseAsync = repositoryBaseAsync;
     private readonly IUnitOfWork<PostDbContext> _unitOfWork = unitOfWork;
-    private readonly IPasswordHasher _passwordHasher = passwordHasher;
+    private readonly UserManager<ApplicationUser> _userManager = userManager;
 
-    public async Task<User> Add(User user)
+    public async Task<ApplicationUser> Add(ApplicationUser user)
     {
-        //Hash password PBKDF2
-        user.Password = _passwordHasher.HashPassword(user.Password);
-        await  _repositoryBaseAsync.CreateAsync(user);
+        await _userManager.CreateAsync(user);
 
         return user;
     }
 
-    public async Task<User> FindByIdAsync(Guid id)
+    public async Task<ApplicationUser> FindByIdAsync(string id)
     {
         return await _repositoryBaseAsync.FindOneAsync(x => x.Id == id);
     }
 
     public async Task<bool> IsUserValidForCreation(string userName)
     {
-        return await _repositoryBaseAsync.FindOneAsync(x => x.Username == userName) == null;
+        return await _repositoryBaseAsync.FindOneAsync(x => x.UserName == userName) == null;
     }
 
-    public async Task Update(User user)
+    public async Task Update(ApplicationUser user)
     {
         await _repositoryBaseAsync.UpdateAsync(user, user.Id);
     }

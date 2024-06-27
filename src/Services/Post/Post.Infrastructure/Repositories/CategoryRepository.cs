@@ -23,6 +23,6 @@ public class CategoryRepository(IRepositoryBaseAsync<Category, PostDbContext> re
 
     public async Task Update(Category category)
     {
-        await _repositoryBaseAsync.UpdateAsync(category, category.Id);
+        await _repositoryBaseAsync.UpdateAsync(category, category.Id.ToString());
     }
 }

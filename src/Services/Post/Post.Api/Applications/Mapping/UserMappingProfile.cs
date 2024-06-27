@@ -8,7 +8,7 @@ public class UserMappingProfile : Profile
 {
     public UserMappingProfile()
     {
-        CreateMap<CreateUserCommand, User>()
+        CreateMap<CreateUserCommand, ApplicationUser>()
             .ForMember(dest => dest.Id, opt => opt.Ignore());
     }
 }
