@@ -1,6 +1,6 @@
 ﻿namespace Infrastructure.Common;
 
-public class RepositoryBase<TEntity, TContext> : RepositoryQueryBase<TEntity, TContext>, 
+public class RepositoryBase<TEntity, TContext> : RepositoryQueryBase<TEntity, TContext>,
     IRepositoryBaseAsync<TEntity, TContext> where TContext : DbContext
     where TEntity : class
 {
@@ -70,19 +70,18 @@ public class RepositoryBase<TEntity, TContext> : RepositoryQueryBase<TEntity, TC
 
     public Task<int> SaveChangesAsync() => _unitOfWork.CommitAsync();
 
-    public void Update(TEntity entity, string id)
+    public void Update(TEntity entity, Expression<Func<TEntity, bool>> expression, bool trackChanges = false)
     {
-        TEntity exist = _dbContext.Set<TEntity>().Find(id);
+        TEntity exist = _dbContext.Set<TEntity>().FirstOrDefault(expression);
         _dbContext.Entry(exist).CurrentValues.SetValues(entity);
     }
 
-    public async Task UpdateAsync(TEntity entity, string id)
+    public async Task UpdateAsync(TEntity entity, Expression<Func<TEntity, bool>> expression, bool trackChanges = false)
     {
         if (_dbContext.Entry(entity).State == EntityState.Unchanged) return;
 
-        TEntity exist = _dbContext.Set<TEntity>().Find(id);
+        TEntity exist = _dbContext.Set<TEntity>().FirstOrDefault(expression);
         _dbContext.Entry(exist).CurrentValues.SetValues(entity);
-
         await SaveChangesAsync();
     }
 
@@ -95,6 +94,6 @@ public class RepositoryBase<TEntity, TContext> : RepositoryQueryBase<TEntity, TC
     {
         _dbContext.Set<TEntity>().AddRange(entities);
         await SaveChangesAsync();
-    } 
+    }
 
 }

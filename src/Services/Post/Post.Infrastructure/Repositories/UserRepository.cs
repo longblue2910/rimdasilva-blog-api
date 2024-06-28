@@ -24,6 +24,11 @@ public class UserRepository(IRepositoryBaseAsync<ApplicationUser, PostDbContext>
         return await _repositoryBaseAsync.FindOneAsync(x => x.Id == id);
     }
 
+    public async Task<ApplicationUser> FindByUsernameAsync(string username)
+    {
+        return await _repositoryBaseAsync.FindOneAsync(x => x.UserName == username);
+    }
+
     public async Task<bool> IsUserValidForCreation(string userName)
     {
         return await _repositoryBaseAsync.FindOneAsync(x => x.UserName == userName) == null;
@@ -31,6 +36,6 @@ public class UserRepository(IRepositoryBaseAsync<ApplicationUser, PostDbContext>
 
     public async Task Update(ApplicationUser user)
     {
-        await _repositoryBaseAsync.UpdateAsync(user, user.Id);
+        await _repositoryBaseAsync.UpdateAsync(user, x => x.Id == user.Id);
     }
 }

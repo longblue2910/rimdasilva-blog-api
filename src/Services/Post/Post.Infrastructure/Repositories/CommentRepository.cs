@@ -14,9 +14,9 @@ public class CommentRepository(IRepositoryBaseAsync<Comment, PostDbContext> repo
         return comment; 
     }
 
-    public async Task<IEnumerable<Comment>> FindByIdAsync(string postId)
+    public async Task<IEnumerable<Comment>> FindByIdAsync(Guid postId)
     {
-        return await _repositoryBase.FindByCondition(x => x.PostId.ToString() == postId).ToListAsync();
+        return await _repositoryBase.FindByCondition(x => x.PostId == postId).ToListAsync();
     }
 
     public async Task Remove(Comment comment)
@@ -26,6 +26,6 @@ public class CommentRepository(IRepositoryBaseAsync<Comment, PostDbContext> repo
 
     public async Task Update(Comment comment)
     {
-        await _repositoryBase.UpdateAsync(comment, comment.Id.ToString());
+        await _repositoryBase.UpdateAsync(comment, x => x.Id == comment.Id);
     }
 }

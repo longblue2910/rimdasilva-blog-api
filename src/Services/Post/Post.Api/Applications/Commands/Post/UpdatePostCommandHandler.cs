@@ -5,14 +5,15 @@ using Post.Domain.AggregatesModel.PostAggregate;
 
 namespace Post.Api.Applications.Commands.Post;
 
-public class CreatePostCommandHandler(IPostRepository repository, IMapper mapper) : IRequestHandler<CreatePostCommand, bool>
+public class UpdatePostCommandHandler(IPostRepository repository, IMapper mapper) : IRequestHandler<UpdatePostCommand, bool>
 {
     private readonly IPostRepository _repository = repository;
     private readonly IMapper _mapper = mapper;
 
-    public async Task<bool> Handle(CreatePostCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
     {
-        var postEntity = _mapper.Map<Domain.AggregatesModel.PostAggregate.Post>(request);
+        var postEntity = await _repository.FindByIdAsync(request.Id.ToString());
+        postEntity = _mapper.Map(request, postEntity);
 
         #region Upload image
 
@@ -37,8 +38,9 @@ public class CreatePostCommandHandler(IPostRepository repository, IMapper mapper
 
         #endregion
 
-        var postAdded =  await _repository.Add(postEntity);
-        await _repository.AddCategorieByPost(postAdded, request.CategoryIds);
+        var postUpdated = await _repository.Update(postEntity);
+        await _repository.AddCategorieByPost(postUpdated, request.CategoryIds);
+        
 
         return true;
     }

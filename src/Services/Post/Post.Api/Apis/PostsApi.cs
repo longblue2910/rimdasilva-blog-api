@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Post.Api.Applications.Commands.Comment;
 using Post.Api.Applications.Commands.Post;
 using Post.Api.Applications.Commands.User;
 using Post.Api.Applications.Queries.Category;
@@ -35,6 +36,8 @@ public static class PostsApi
         var api = app.MapGroup("api/post").HasApiVersion(1.0);
 
         api.MapPost("/", CreatePostAsync).DisableAntiforgery();
+        api.MapPut("/", UpdatePostAsync).DisableAntiforgery();
+
         api.MapGet("/{id}", GetPostByIdAsync);
         api.MapGet("/get-by-slug/{slug}", GetPostBySlugAsync);
         api.MapPost("/paging", GetsPostAsync);
@@ -42,6 +45,17 @@ public static class PostsApi
         return api;
     }
 
+    public static RouteGroupBuilder MapCommentsApiV1(this IEndpointRouteBuilder app)
+    {
+        var api = app.MapGroup("api/comment").HasApiVersion(1.0);
+
+        api.MapPost("/", CommentAsync);
+        api.MapGet("/{postId}", GetsCommentByPostAsync);
+
+        return api;
+    }
+
+    #region User endpoint
 
     public static async Task<Results<Ok, BadRequest<string>>> CreateUserAsync(
     [FromHeader(Name = "x-requestid")] Guid requestId,
@@ -78,16 +92,21 @@ public static class PostsApi
         return TypedResults.Ok();
     }
 
+    #endregion
 
+    #region Category endpoint
 
     public static async Task<Ok<List<Category>>> GetsCategoryAsync([AsParameters] PostServices services, int size)
     {
-        var query = new GetsCategoryQuery {Size = size};
+        var query = new GetsCategoryQuery { Size = size };
         var result = await services.Mediator.Send(query);
 
         return TypedResults.Ok(result);
     }
 
+    #endregion
+
+    #region Post endpoint
 
     public static async Task<Results<Ok, BadRequest<string>>> CreatePostAsync(
     [FromHeader(Name = "x-requestid")] Guid requestId,
@@ -113,6 +132,33 @@ public static class PostsApi
 
         return TypedResults.Ok();
     }
+
+    public static async Task<Results<Ok, BadRequest<string>>> UpdatePostAsync(
+    [FromHeader(Name = "x-requestid")] Guid requestId,
+    [FromForm] UpdatePostCommand request,
+    [AsParameters] PostServices services)
+    {
+        services.Logger.LogInformation(
+            "Sending command: {CommandName} - {IdProperty}: {CommandId}",
+            request.GetGenericTypeName(),
+            nameof(request.Title),
+            request.Title);
+
+        var result = await services.Mediator.Send(request);
+
+        if (result)
+        {
+            services.Logger.LogInformation("UpdatePostCommand succeeded - RequestId: {RequestId}", requestId);
+        }
+        else
+        {
+            services.Logger.LogWarning("UpdatePostCommand failed - RequestId: {RequestId}", requestId);
+        }
+
+        return TypedResults.Ok();
+    }
+
+
 
     public static async Task<Ok<Domain.AggregatesModel.PostAggregate.Post>> GetPostByIdAsync([AsParameters] PostServices services, string id)
     {
@@ -154,6 +200,58 @@ public static class PostsApi
 
         return TypedResults.Ok(new PaginatedItems<Domain.AggregatesModel.PostAggregate.Post>(pageIndex, pageSize, totalItems, itemsOnPage));
     }
+
+    #endregion
+
+    #region Comment endpoint
+
+    public static async Task<Results<Ok, BadRequest<string>>> CommentAsync(
+    [FromHeader(Name = "x-requestid")] Guid requestId,
+    [FromBody] CommentCommand request,
+    [AsParameters] PostServices services)
+    {
+        services.Logger.LogInformation(
+            "Sending command: {CommandName} - {IdProperty}: {CommandId}",
+            request.GetGenericTypeName(),
+            nameof(request.Username),
+            request.Username);
+
+        var result = await services.Mediator.Send(request);
+
+        if (result)
+        {
+            services.Logger.LogInformation("CommentCommand succeeded - RequestId: {RequestId}", requestId);
+        }
+        else
+        {
+            services.Logger.LogWarning("CommentCommand failed - RequestId: {RequestId}", requestId);
+        }
+
+        return TypedResults.Ok();
+    }
+
+
+    public static async Task<Ok<PaginatedItems<Domain.AggregatesModel.CommentAggregate.Comment>>> GetsCommentByPostAsync(
+        [AsParameters] PaginationRequest paginationRequest,
+        [AsParameters] PostServices services,
+        Guid postId)
+    {
+        var pageSize = paginationRequest.PageSize;
+        var pageIndex = paginationRequest.PageIndex;
+        var offSet = pageIndex * pageSize - pageSize;
+
+        var totalItems = await services.Context.Comments
+            .Where(c => c.PostId == postId)
+            .LongCountAsync();
+
+        var itemsOnPage = await services.Context.Comments
+            .Where(c => c.PostId == postId).OrderByDescending(x => x.CreatedDate)
+            .Skip(offSet)
+            .Take(pageSize)
+            .ToListAsync();
+        return TypedResults.Ok(new PaginatedItems<Domain.AggregatesModel.CommentAggregate.Comment>(pageIndex, pageSize, totalItems, itemsOnPage));
+    }
+    #endregion
 }
 
 public record CreateUserRequest(

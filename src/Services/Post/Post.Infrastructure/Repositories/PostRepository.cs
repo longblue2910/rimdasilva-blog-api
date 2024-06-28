@@ -1,38 +1,41 @@
 ﻿using Contracts.Common.Interfaces;
 using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.PostAggregate;
-using Post.Domain.Dtos.Post;
 
 namespace Post.Infrastructure.Repositories;
 
 public class PostRepository(IRepositoryBaseAsync<Domain.AggregatesModel.PostAggregate.Post, PostDbContext> repositoryBase,
-    IRepositoryBaseAsync<Category, PostDbContext> categoryRepo, IUnitOfWork<PostDbContext> unitOfWork) : IPostRepository
+    IRepositoryBaseAsync<Category, PostDbContext> categoryRepo, IUnitOfWork<PostDbContext> unitOfWork, PostDbContext context) : IPostRepository
 {
     private readonly IRepositoryBaseAsync<Domain.AggregatesModel.PostAggregate.Post, PostDbContext> _repositoryBase = repositoryBase;
     private readonly IRepositoryBaseAsync<Category, PostDbContext> _categoryRepo = categoryRepo;
     private readonly IUnitOfWork<PostDbContext> _unitOfWork = unitOfWork;
+    private readonly PostDbContext _context = context;
 
-    public async Task<Domain.AggregatesModel.PostAggregate.Post> Add(CreateOrUpdatePostDto postDto)
+    public async Task<Domain.AggregatesModel.PostAggregate.Post> Add(Domain.AggregatesModel.PostAggregate.Post post)
+    {     
+        await _repositoryBase.CreateAsync(post);
+        return post;
+    }
+
+    public async Task AddCategorieByPost(Domain.AggregatesModel.PostAggregate.Post postEntity, List<Guid> Ids)
     {
-        var id = Guid.NewGuid();
+        await _context.Entry(postEntity)
+                .Collection(i => i.Categories).LoadAsync();
 
-        var postEntity = new Domain.AggregatesModel.PostAggregate.Post
+        var listCate = _categoryRepo.FindByCondition(x => Ids.Contains(x.Id)).ToList();
+
+        foreach (var item in listCate)
         {
-            Id = id,
-            Slug = postDto.Slug,
-            Title = postDto.Title,
-            ImageUrl = postDto.ImageUrl,
-            Description = postDto.Description,
-        };
-
-        _repositoryBase.Create(postEntity);
-        await _unitOfWork.CommitAsync();
-
-        var listCate = _categoryRepo.FindByCondition(x => postDto.CategoryIds.Contains(x.Id)).ToList();
-        postEntity.Categories = listCate;
+            //Check exist
+            var isExist = postEntity.Categories.Any(x => x.Id == item.Id);
+            if (!isExist)
+            {
+                postEntity.Categories.Add(item);
+            }
+        }
 
         await _unitOfWork.CommitAsync();
-        return postEntity;
     }
 
     public async Task<Domain.AggregatesModel.PostAggregate.Post> FindByIdAsync(string id)
@@ -50,15 +53,9 @@ public class PostRepository(IRepositoryBaseAsync<Domain.AggregatesModel.PostAggr
         await _repositoryBase.DeleteAsync(post);
     }
 
-    public async Task Update(CreateOrUpdatePostDto postDto, string postId)
-    {
-        var postEntity = new Domain.AggregatesModel.PostAggregate.Post
-        {
-            Slug = postDto.Slug,
-
-        };
-
-        await _repositoryBase.UpdateAsync(postEntity, postId.ToString());
-
+    public async Task<Domain.AggregatesModel.PostAggregate.Post> Update(Domain.AggregatesModel.PostAggregate.Post postEntity)
+    {     
+        await _repositoryBase.UpdateAsync(postEntity, x => x.Id == postEntity.Id);
+        return postEntity;
     }
 }
