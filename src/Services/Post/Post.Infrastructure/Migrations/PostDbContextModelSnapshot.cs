@@ -23,6 +23,21 @@ namespace Post.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("CategoryPost", b =>
+                {
+                    b.Property<Guid>("CategoriesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PostsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("CategoriesId", "PostsId");
+
+                    b.HasIndex("PostsId");
+
+                    b.ToTable("CategoryPost", "post");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -169,7 +184,7 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(536));
+                        .HasDefaultValue(new DateTime(2024, 6, 28, 14, 3, 4, 960, DateTimeKind.Local).AddTicks(3745));
 
                     b.Property<string>("ImgUrl")
                         .HasColumnType("nvarchar(max)");
@@ -185,8 +200,8 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("PostId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
 
                     b.Property<string>("Slug")
                         .HasColumnType("nvarchar(max)");
@@ -195,8 +210,6 @@ namespace Post.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PostId");
 
                     b.ToTable("Categories", "post");
                 });
@@ -217,7 +230,7 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(4967));
+                        .HasDefaultValue(new DateTime(2024, 6, 28, 14, 3, 4, 960, DateTimeKind.Local).AddTicks(7259));
 
                     b.Property<bool?>("IsDelete")
                         .ValueGeneratedOnAdd()
@@ -256,7 +269,7 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(2860));
+                        .HasDefaultValue(new DateTime(2024, 6, 28, 14, 3, 4, 960, DateTimeKind.Local).AddTicks(5184));
 
                     b.Property<string>("Description")
                         .HasColumnType("NVARCHAR(MAX)");
@@ -362,6 +375,21 @@ namespace Post.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", "post");
                 });
 
+            modelBuilder.Entity("CategoryPost", b =>
+                {
+                    b.HasOne("Post.Domain.AggregatesModel.CategoryAggregate.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Post.Domain.AggregatesModel.PostAggregate.Post", null)
+                        .WithMany()
+                        .HasForeignKey("PostsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -413,13 +441,6 @@ namespace Post.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Post.Domain.AggregatesModel.CategoryAggregate.Category", b =>
-                {
-                    b.HasOne("Post.Domain.AggregatesModel.PostAggregate.Post", null)
-                        .WithMany("Categories")
-                        .HasForeignKey("PostId");
-                });
-
             modelBuilder.Entity("Post.Domain.AggregatesModel.CommentAggregate.Comment", b =>
                 {
                     b.HasOne("Post.Domain.AggregatesModel.PostAggregate.Post", "Post")
@@ -433,8 +454,6 @@ namespace Post.Infrastructure.Migrations
 
             modelBuilder.Entity("Post.Domain.AggregatesModel.PostAggregate.Post", b =>
                 {
-                    b.Navigation("Categories");
-
                     b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618

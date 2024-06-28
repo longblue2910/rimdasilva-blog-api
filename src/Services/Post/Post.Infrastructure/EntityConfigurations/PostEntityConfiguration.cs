@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Post.Domain.AggregatesModel.CategoryAggregate;
-using Post.Domain.AggregatesModel.CommentAggregate;
-using System.Reflection.Emit;
 
 namespace Post.Infrastructure.EntityConfigurations;
 
@@ -39,6 +36,9 @@ public class PostEntityConfiguration : IEntityTypeConfiguration<Domain.Aggregate
 
         builder.Property(x => x.CreatedDate)
                 .HasDefaultValue(DateTime.Now);
+
+        builder.HasMany(x => x.Categories)
+             .WithMany(x => x.Posts);
 
     }
 }

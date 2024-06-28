@@ -5,6 +5,10 @@ namespace Post.Domain.AggregatesModel.PostAggregate;
 
 public class Post : EntityAuditBase<Guid>
 {
+    public Post()
+    {
+        Categories = [];
+    }
     public string Title { get; set; }
     public string Description { get; set; }
     public string ImageUrl { get; set; }

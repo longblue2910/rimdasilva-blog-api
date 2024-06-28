@@ -23,7 +23,7 @@ public class CreatePostCommandHandler(IPostRepository repository, IMapper mapper
 
         string extension = Path.GetExtension(request.ImageFile.FileName);
 
-        string imageName = $"{request.Slug}.{extension}";
+        string imageName = $"{request.Slug}{extension}";
         string filePathImage = Path.Combine(uploadImagesFolder, imageName);
 
         using (FileStream stream = new(filePathImage, FileMode.Create))

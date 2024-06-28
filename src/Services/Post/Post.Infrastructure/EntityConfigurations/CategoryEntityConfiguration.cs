@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Post.Domain.AggregatesModel.CategoryAggregate;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Post.Infrastructure.EntityConfigurations;
 
@@ -22,7 +23,6 @@ public class CategoryEntityConfiguration : IEntityTypeConfiguration<Category>
 
         builder.Property(x => x.CreatedDate)
                 .HasDefaultValue(DateTime.Now);
-
 
     }
 }

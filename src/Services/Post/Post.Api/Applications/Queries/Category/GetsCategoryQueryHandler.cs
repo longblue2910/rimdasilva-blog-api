@@ -9,6 +9,6 @@ public class GetsCategoryQueryHandler(ICategoryRepository repository) : IRequest
 
     public async Task<List<Domain.AggregatesModel.CategoryAggregate.Category>> Handle(GetsCategoryQuery request, CancellationToken cancellationToken)
     {
-        return await _repository.GetCategories();
+        return await _repository.GetCategories(request.Size);
     }
 }

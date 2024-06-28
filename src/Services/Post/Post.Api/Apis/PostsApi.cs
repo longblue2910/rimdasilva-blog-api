@@ -1,11 +1,14 @@
 ﻿using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Post.Api.Applications.Commands.Post;
 using Post.Api.Applications.Commands.User;
 using Post.Api.Applications.Queries.Category;
+using Post.Api.Models;
 using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.UserAggregate;
+using Post.Domain.Models;
 
 namespace Post.Api.Apis;
 
@@ -27,14 +30,14 @@ public static class PostsApi
         return api;
     }
 
-
     public static RouteGroupBuilder MapPostsApiV1(this IEndpointRouteBuilder app)
     {
         var api = app.MapGroup("api/post").HasApiVersion(1.0);
 
         api.MapPost("/", CreatePostAsync).DisableAntiforgery();
         api.MapGet("/{id}", GetPostByIdAsync);
-        api.MapGet("/get-by-slug/{slug}", GetPostByIdAsync);
+        api.MapGet("/get-by-slug/{slug}", GetPostBySlugAsync);
+        api.MapPost("/paging", GetsPostAsync);
 
         return api;
     }
@@ -59,7 +62,6 @@ public static class PostsApi
             Email = request.Email,
             Password = request.Password,
             PhoneNumber = request.PhoneNumber,
-
         };
 
         var result = await services.Mediator.Send(command);
@@ -78,9 +80,9 @@ public static class PostsApi
 
 
 
-    public static async Task<Ok<List<Category>>> GetsCategoryAsync([AsParameters] PostServices services)
+    public static async Task<Ok<List<Category>>> GetsCategoryAsync([AsParameters] PostServices services, int size)
     {
-        var query = new GetsCategoryQuery {};
+        var query = new GetsCategoryQuery {Size = size};
         var result = await services.Mediator.Send(query);
 
         return TypedResults.Ok(result);
@@ -124,6 +126,34 @@ public static class PostsApi
         return TypedResults.Ok(result);
     }
 
+    public static async Task<Ok<PaginatedItems<Domain.AggregatesModel.PostAggregate.Post>>> GetsPostAsync(
+        [AsParameters] PaginationRequest paginationRequest,
+        [AsParameters] PostServices services,
+        [FromBody] SearchPostRequest request)
+    {
+        var pageSize = paginationRequest.PageSize;
+        var pageIndex = paginationRequest.PageIndex;
+        var offSet = pageIndex * pageSize - pageSize;
+
+        var totalItems = await services.Context.Posts
+            .Where
+            (
+               c => (!request.CategoryId.HasValue || c.Categories.Any(x => (x.Id == request.CategoryId))) &&
+                    (string.IsNullOrEmpty(request.Title) || c.Title.StartsWith(request.Title))
+            )
+            .LongCountAsync();
+
+        var itemsOnPage = await services.Context.Posts
+            .Where
+            (
+               c => (c.Categories.Any(x => (!request.CategoryId.HasValue || x.Id == request.CategoryId))) &&
+                    (string.IsNullOrEmpty(request.Title) || c.Title.StartsWith(request.Title))
+            ).Skip(offSet)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return TypedResults.Ok(new PaginatedItems<Domain.AggregatesModel.PostAggregate.Post>(pageIndex, pageSize, totalItems, itemsOnPage));
+    }
 }
 
 public record CreateUserRequest(
@@ -135,3 +165,8 @@ public record CreateUserRequest(
     UserType UserType
 );
 
+
+public record SearchPostRequest(
+    Guid? CategoryId,
+    string Title
+);

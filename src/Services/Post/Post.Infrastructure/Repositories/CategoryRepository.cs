@@ -16,9 +16,9 @@ public class CategoryRepository(IRepositoryBaseAsync<Category, PostDbContext> re
         return category;
     }
 
-    public Task<List<Category>> GetCategories()
+    public async Task<List<Category>> GetCategories(int size)
     {
-        return _repositoryBaseAsync.FindByCondition(x => true).ToListAsync(cancellationToken: default);
+        return await _repositoryBaseAsync.FindByCondition(x => true).OrderBy(x => x.OrderIndex).Take(size).ToListAsync(cancellationToken: default);
     }
 
     public async Task Update(Category category)

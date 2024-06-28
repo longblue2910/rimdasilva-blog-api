@@ -4,7 +4,8 @@ public class UnitOfWork<TContext>(TContext context) : IUnitOfWork<TContext> wher
 {
     private readonly TContext _context = context;
 
-    public Task<int> CommitAsync() => _context.SaveChangesAsync();
+    public async Task<int> CommitAsync()
+        => await _context.SaveChangesAsync();
 
 
     public void Dispose()

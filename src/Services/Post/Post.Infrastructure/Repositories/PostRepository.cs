@@ -6,23 +6,32 @@ using Post.Domain.Dtos.Post;
 namespace Post.Infrastructure.Repositories;
 
 public class PostRepository(IRepositoryBaseAsync<Domain.AggregatesModel.PostAggregate.Post, PostDbContext> repositoryBase,
-    IRepositoryBaseAsync<Category, PostDbContext> categoryRepo) : IPostRepository
+    IRepositoryBaseAsync<Category, PostDbContext> categoryRepo, IUnitOfWork<PostDbContext> unitOfWork) : IPostRepository
 {
     private readonly IRepositoryBaseAsync<Domain.AggregatesModel.PostAggregate.Post, PostDbContext> _repositoryBase = repositoryBase;
     private readonly IRepositoryBaseAsync<Category, PostDbContext> _categoryRepo = categoryRepo;
+    private readonly IUnitOfWork<PostDbContext> _unitOfWork = unitOfWork;
 
     public async Task<Domain.AggregatesModel.PostAggregate.Post> Add(CreateOrUpdatePostDto postDto)
     {
+        var id = Guid.NewGuid();
+
         var postEntity = new Domain.AggregatesModel.PostAggregate.Post
         {
+            Id = id,
             Slug = postDto.Slug,
             Title = postDto.Title,
             ImageUrl = postDto.ImageUrl,
             Description = postDto.Description,
-            Categories = [.. _categoryRepo.FindByCondition(x => postDto.CategoryIds.Contains(x.Id))],
         };
 
-        await _repositoryBase.CreateAsync(postEntity);
+        _repositoryBase.Create(postEntity);
+        await _unitOfWork.CommitAsync();
+
+        var listCate = _categoryRepo.FindByCondition(x => postDto.CategoryIds.Contains(x.Id)).ToList();
+        postEntity.Categories = listCate;
+
+        await _unitOfWork.CommitAsync();
         return postEntity;
     }
 

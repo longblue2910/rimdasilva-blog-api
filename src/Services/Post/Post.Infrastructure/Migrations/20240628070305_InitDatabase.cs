@@ -58,6 +58,27 @@ namespace Post.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Categories",
+                schema: "post",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
+                    Slug = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ImgUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OrderIndex = table.Column<int>(type: "int", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValue: new DateTime(2024, 6, 28, 14, 3, 4, 960, DateTimeKind.Local).AddTicks(3745)),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreateBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Posts",
                 schema: "post",
                 columns: table => new
@@ -68,7 +89,7 @@ namespace Post.Infrastructure.Migrations
                     ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Slug = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsDelete = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValue: new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(2860)),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValue: new DateTime(2024, 6, 28, 14, 3, 4, 960, DateTimeKind.Local).AddTicks(5184)),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreateBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -196,30 +217,30 @@ namespace Post.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Categories",
+                name: "CategoryPost",
                 schema: "post",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
-                    Slug = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ImgUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsDelete = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValue: new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(536)),
-                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreateBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    CategoriesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PostsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.PrimaryKey("PK_CategoryPost", x => new { x.CategoriesId, x.PostsId });
                     table.ForeignKey(
-                        name: "FK_Categories_Posts_PostId",
-                        column: x => x.PostId,
+                        name: "FK_CategoryPost_Categories_CategoriesId",
+                        column: x => x.CategoriesId,
+                        principalSchema: "post",
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CategoryPost_Posts_PostsId",
+                        column: x => x.PostsId,
                         principalSchema: "post",
                         principalTable: "Posts",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -232,7 +253,7 @@ namespace Post.Infrastructure.Migrations
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IsDelete = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValue: new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(4967)),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValue: new DateTime(2024, 6, 28, 14, 3, 4, 960, DateTimeKind.Local).AddTicks(7259)),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreateBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -296,10 +317,10 @@ namespace Post.Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Categories_PostId",
+                name: "IX_CategoryPost_PostsId",
                 schema: "post",
-                table: "Categories",
-                column: "PostId");
+                table: "CategoryPost",
+                column: "PostsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_PostId",
@@ -332,7 +353,7 @@ namespace Post.Infrastructure.Migrations
                 schema: "post");
 
             migrationBuilder.DropTable(
-                name: "Categories",
+                name: "CategoryPost",
                 schema: "post");
 
             migrationBuilder.DropTable(
@@ -345,6 +366,10 @@ namespace Post.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers",
+                schema: "post");
+
+            migrationBuilder.DropTable(
+                name: "Categories",
                 schema: "post");
 
             migrationBuilder.DropTable(

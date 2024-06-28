@@ -32,31 +32,35 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
                  Title = ".Net Core",
                  Slug = "netcore",
                  ImgUrl = "netcore.png",
-                 OrderIndex= 2,
+                OrderIndex = 2,
             },
             new()
             {
                 Title = "SQL",
                 Slug = "sql",
-                ImgUrl = "sql.png"
+                ImgUrl = "sql.png",
+                OrderIndex = 3,
             },
             new()
             {
                 Title = "DevOps",
                 Slug = "devops",
-                ImgUrl = "devops.png"
+                ImgUrl = "devops.png",
+                OrderIndex = 4,
             },
             new()
             {
                 Title = "Design",
                 Slug = "design",
-                ImgUrl = "design.png"
+                ImgUrl = "design.png",
+                OrderIndex = 5,
             },
             new()
             {
                 Title = "Khác",
                 Slug = "other",
-                ImgUrl = "other.png"
+                ImgUrl = "other.png",
+                OrderIndex = 6,
             },
         ];
     }
