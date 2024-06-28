@@ -12,7 +12,7 @@ using Post.Infrastructure;
 namespace Post.Infrastructure.Migrations
 {
     [DbContext(typeof(PostDbContext))]
-    [Migration("20240627082913_InitDatabase")]
+    [Migration("20240627152923_InitDatabase")]
     partial class InitDatabase
     {
         /// <inheritdoc />
@@ -172,7 +172,7 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 27, 15, 29, 12, 809, DateTimeKind.Local).AddTicks(5495));
+                        .HasDefaultValue(new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(536));
 
                     b.Property<string>("ImgUrl")
                         .HasColumnType("nvarchar(max)");
@@ -220,7 +220,7 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 27, 15, 29, 12, 809, DateTimeKind.Local).AddTicks(8277));
+                        .HasDefaultValue(new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(4967));
 
                     b.Property<bool?>("IsDelete")
                         .ValueGeneratedOnAdd()
@@ -259,7 +259,7 @@ namespace Post.Infrastructure.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2024, 6, 27, 15, 29, 12, 809, DateTimeKind.Local).AddTicks(6883));
+                        .HasDefaultValue(new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(2860));
 
                     b.Property<string>("Description")
                         .HasColumnType("NVARCHAR(MAX)");
@@ -278,6 +278,9 @@ namespace Post.Infrastructure.Migrations
 
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Slug")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()

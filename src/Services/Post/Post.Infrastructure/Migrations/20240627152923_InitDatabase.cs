@@ -66,8 +66,9 @@ namespace Post.Infrastructure.Migrations
                     Title = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Description = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
                     ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Slug = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsDelete = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValue: new DateTime(2024, 6, 27, 15, 29, 12, 809, DateTimeKind.Local).AddTicks(6883)),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValue: new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(2860)),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreateBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -205,7 +206,7 @@ namespace Post.Infrastructure.Migrations
                     ImgUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IsDelete = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValue: new DateTime(2024, 6, 27, 15, 29, 12, 809, DateTimeKind.Local).AddTicks(5495)),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValue: new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(536)),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreateBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -231,7 +232,7 @@ namespace Post.Infrastructure.Migrations
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IsDelete = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValue: new DateTime(2024, 6, 27, 15, 29, 12, 809, DateTimeKind.Local).AddTicks(8277)),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValue: new DateTime(2024, 6, 27, 22, 29, 22, 637, DateTimeKind.Local).AddTicks(4967)),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreateBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
