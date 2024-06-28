@@ -32,7 +32,7 @@ public static class PostsApi
     {
         var api = app.MapGroup("api/post").HasApiVersion(1.0);
 
-        api.MapPost("/", CreatePostAsync);
+        api.MapPost("/", CreatePostAsync).DisableAntiforgery();
         api.MapGet("/{id}", GetPostByIdAsync);
         api.MapGet("/get-by-slug/{slug}", GetPostByIdAsync);
 
@@ -89,7 +89,7 @@ public static class PostsApi
 
     public static async Task<Results<Ok, BadRequest<string>>> CreatePostAsync(
     [FromHeader(Name = "x-requestid")] Guid requestId,
-    CreatePostCommand request,
+    [FromForm] CreatePostCommand request,
     [AsParameters] PostServices services)
     {
         services.Logger.LogInformation(

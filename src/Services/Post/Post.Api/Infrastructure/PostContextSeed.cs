@@ -1,6 +1,4 @@
-﻿using EFCore.BulkExtensions;
-using Post.Domain.AggregatesModel.CategoryAggregate;
-using Post.Domain.AggregatesModel.UserAggregate;
+﻿using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Infrastructure;
 
 namespace Post.Api.Infrastructure;
@@ -26,14 +24,40 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
             {
                 Title = "C#",
                 Slug = "csharp",
-                ImgUrl = "csharp.png"
+                ImgUrl = "csharp.png",
+                OrderIndex = 1,
             },
             new()
             {
                  Title = ".Net Core",
                  Slug = "netcore",
-                 ImgUrl = "netcore.png"
-            }
+                 ImgUrl = "netcore.png",
+                 OrderIndex= 2,
+            },
+            new()
+            {
+                Title = "SQL",
+                Slug = "sql",
+                ImgUrl = "sql.png"
+            },
+            new()
+            {
+                Title = "DevOps",
+                Slug = "devops",
+                ImgUrl = "devops.png"
+            },
+            new()
+            {
+                Title = "Design",
+                Slug = "design",
+                ImgUrl = "design.png"
+            },
+            new()
+            {
+                Title = "Khác",
+                Slug = "other",
+                ImgUrl = "other.png"
+            },
         ];
     }
 

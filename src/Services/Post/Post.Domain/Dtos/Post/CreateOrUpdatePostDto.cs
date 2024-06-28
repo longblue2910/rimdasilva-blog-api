@@ -1,12 +1,10 @@
-﻿using MediatR;
+﻿namespace Post.Domain.Dtos.Post;
 
-namespace Post.Api.Applications.Commands.Post;
-
-public class CreatePostCommand : IRequest<bool>
+public class CreateOrUpdatePostDto
 {
     public string Title { get; set; }
     public string Description { get; set; }
-    public IFormFile ImageFile { get; set; }
+    public string ImageUrl { get; set; }
     public string Slug { get; set; }
     public List<Guid> CategoryIds { get; set; } = [];
 }

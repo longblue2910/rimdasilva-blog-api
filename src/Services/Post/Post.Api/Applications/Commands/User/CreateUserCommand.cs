@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Post.Domain.AggregatesModel.UserAggregate;
 
 namespace Post.Api.Applications.Commands.User;
 

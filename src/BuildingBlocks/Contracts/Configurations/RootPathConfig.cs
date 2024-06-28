@@ -6,6 +6,6 @@ public class RootPathConfig
 
     public class UploadPath
     {
-        public static readonly string PathImage = Dirpath + @"/Uploads/Image";
+        public static readonly string PathImagePost = Dirpath + @"/Uploads/Image/Post";
     }
 }

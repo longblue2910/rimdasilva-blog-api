@@ -15,6 +15,7 @@ builder.Services.AddJwtAuthentication();
 
 builder.Services.ConfigureCors(builder.Configuration);
 
+builder.Services.AddAntiforgery();
 
 var withApiVersioning = builder.Services.AddApiVersioning();
 
@@ -32,7 +33,11 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/Uploads"
 });
 
+
 app.UseRouting();
+
+app.UseAntiforgery();
+
 app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
@@ -41,6 +46,5 @@ app.UseAuthorization();
 app.ApiManage();
 
 app.UseDefaultOpenApi();
-
 
 app.Run();
