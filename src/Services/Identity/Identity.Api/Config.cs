@@ -47,7 +47,7 @@ namespace Identity.Api
                     PostLogoutRedirectUris = { "https://localhost:44300/signout-callback-oidc" },
 
                     AllowOfflineAccess = true,
-                    AllowedScopes = { "openid", "profile", "scope2" }
+                    AllowedScopes = { "openid", "profile", "postapi" }
                 },
                 new Client
                 {

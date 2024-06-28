@@ -74,35 +74,6 @@ public static class ServiceExtensions
         });
     }
 
-    public static void AddJwtAuthentication(this IServiceCollection services)
-    {
-        var setting = services.GetOptions<JwtSettings>(nameof(JwtSettings));
-        if (setting == null || string.IsNullOrEmpty(setting.Key))
-            throw new ArgumentNullException($"{nameof(JwtSettings)} is not configured propely.");
-
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(setting.Key));
-
-        var tokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = signingKey,
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = false,
-            ClockSkew = TimeSpan.Zero,
-            RequireExpirationTime = false
-        };
-        services.AddAuthentication(o =>
-        {
-            o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(x =>
-        {
-            x.SaveToken = true;
-            x.RequireHttpsMetadata = false;
-            x.TokenValidationParameters = tokenValidationParameters;
-        });
-    }
     public static IHostApplicationBuilder AddDefaultOpenApi(
         this IHostApplicationBuilder builder,
         IApiVersioningBuilder apiVersioning = default)
@@ -182,6 +153,36 @@ public static class ServiceExtensions
         }
 
         return app;
+    }
+
+    public static void AddOAuth(this IServiceCollection services)
+    {
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.Authority = "https://localhost:5001"; // URL của IdentityServer
+            options.Audience = "postapi";
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true
+            };
+        });
+        
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("ApiScope", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireClaim("scope", "postapi");
+            });
+        });
     }
 
 }

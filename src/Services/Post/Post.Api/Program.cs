@@ -1,4 +1,4 @@
-using Microsoft.Extensions.FileProviders;
+﻿using Microsoft.Extensions.FileProviders;
 using Post.Api.Extensions;
 using Post.Infrastructure;
 
@@ -11,15 +11,17 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddApplicationServices();
 
-builder.Services.AddJwtAuthentication();
-
 builder.Services.ConfigureCors(builder.Configuration);
 
 builder.Services.AddAntiforgery();
 
+builder.Services.AddOAuth();
+
 var withApiVersioning = builder.Services.AddApiVersioning();
 
 builder.AddDefaultOpenApi(withApiVersioning);
+
+
 
 var app = builder.Build();
 
