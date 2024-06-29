@@ -24,5 +24,6 @@ public class CategoryEntityConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(x => x.CreatedDate)
                 .HasDefaultValue(DateTime.Now);
 
+
     }
 }

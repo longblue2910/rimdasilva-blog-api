@@ -9,7 +9,6 @@ using Post.Api.Applications.Queries.Category;
 using Post.Api.Models;
 using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.UserAggregate;
-using Post.Domain.Models;
 
 namespace Post.Api.Apis;
 
@@ -172,7 +171,7 @@ public static class PostsApi
         return TypedResults.Ok(result);
     }
 
-    public static async Task<Ok<PaginatedItems<Domain.AggregatesModel.PostAggregate.Post>>> GetsPostAsync(
+    public static async Task<Ok<PaginatedItems<PostDto>>> GetsPostAsync(
         [AsParameters] PaginationRequest paginationRequest,
         [AsParameters] PostServices services,
         [FromBody] SearchPostRequest request)
@@ -185,6 +184,7 @@ public static class PostsApi
             .Where
             (
                c => (!request.CategoryId.HasValue || c.Categories.Any(x => (x.Id == request.CategoryId))) &&
+                    (string.IsNullOrEmpty(request.Slug) || c.Categories.Any(x => (x.Slug.StartsWith(request.Slug)))) &&
                     (string.IsNullOrEmpty(request.Title) || c.Title.StartsWith(request.Title))
             )
             .LongCountAsync();
@@ -193,12 +193,46 @@ public static class PostsApi
             .Where
             (
                c => (c.Categories.Any(x => (!request.CategoryId.HasValue || x.Id == request.CategoryId))) &&
+                    (string.IsNullOrEmpty(request.Slug) || c.Categories.Any(x => (x.Slug.StartsWith(request.Slug)))) &&
                     (string.IsNullOrEmpty(request.Title) || c.Title.StartsWith(request.Title))
             ).Skip(offSet)
             .Take(pageSize)
+            .Include(x => x.Categories)
+            .Select(x => new PostDto
+            {
+                Slug = x.Slug,
+                Title = x.Title,
+                Description = x.Description,
+                ImageUrl = x.ImageUrl,
+                Id = x.Id,
+                CreatedDate = x.CreatedDate,
+                Categories = x.Categories.Select(c => new CategoryDto
+                {
+                    Id = c.Id,
+                    TagName = c.TagName,
+                    Title = c.Title,
+                }).ToList(),
+            })
             .ToListAsync();
 
-        return TypedResults.Ok(new PaginatedItems<Domain.AggregatesModel.PostAggregate.Post>(pageIndex, pageSize, totalItems, itemsOnPage));
+        foreach (var item in itemsOnPage)
+        {
+            item.Description = ShortenDescription(item.Description, 200);
+        }
+
+        return TypedResults.Ok(new PaginatedItems<PostDto>(pageIndex, pageSize, totalItems, itemsOnPage));
+    }
+
+    private static string ShortenDescription(string description, int maxLength)
+    {
+
+        if (description.Length <= maxLength)
+        {
+            return description;
+        }
+
+        string shortened = description[..maxLength];
+        return shortened + "...";
     }
 
     #endregion
@@ -266,5 +300,24 @@ public record CreateUserRequest(
 
 public record SearchPostRequest(
     Guid? CategoryId,
-    string Title
+    string Title,
+    string Slug
 );
+
+public class PostDto
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public string ImageUrl { get; set; }
+    public string Slug { get; set; }
+    public DateTime? CreatedDate { get; set; }
+    public List<CategoryDto> Categories { get; set; } = [];
+}
+
+public class CategoryDto
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; }
+    public string TagName { get; set; }
+}

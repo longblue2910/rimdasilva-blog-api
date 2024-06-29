@@ -7,12 +7,10 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
 {
     public async Task SeedAsync(PostDbContext context)
     {
-        
         if (!context.Categories.Any())
         {
             context.Categories.AddRange(GetCategories());
         }
-
         await context.SaveChangesAsync();
     }
 
@@ -26,13 +24,16 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
                 Slug = "csharp",
                 ImgUrl = "csharp.png",
                 OrderIndex = 1,
+                TagName = "#CSharp"
             },
             new()
             {
                  Title = ".Net Core",
                  Slug = "netcore",
                  ImgUrl = "netcore.png",
-                OrderIndex = 2,
+                 OrderIndex = 2,
+                 TagName = "#NetCore"
+
             },
             new()
             {
@@ -40,6 +41,7 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
                 Slug = "sql",
                 ImgUrl = "sql.png",
                 OrderIndex = 3,
+                TagName = "#SQL"
             },
             new()
             {
@@ -47,6 +49,7 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
                 Slug = "devops",
                 ImgUrl = "devops.png",
                 OrderIndex = 4,
+                TagName = "#DevOps"
             },
             new()
             {
@@ -54,6 +57,7 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
                 Slug = "design",
                 ImgUrl = "design.png",
                 OrderIndex = 5,
+                TagName = "#Design"
             },
             new()
             {
@@ -61,6 +65,7 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
                 Slug = "other",
                 ImgUrl = "other.png",
                 OrderIndex = 6,
+                TagName = "#Khác"
             },
         ];
     }
