@@ -287,7 +287,7 @@ public static class PostsApi
         return TypedResults.Ok(new PaginatedItems<Domain.AggregatesModel.CommentAggregate.Comment>(pageIndex, pageSize, totalItems, itemsOnPage));
     }
 
-    public static async Task<Ok<PaginatedItems<Domain.AggregatesModel.CommentAggregate.Comment>>> GetsCommentBySlugAsync(
+    public static async Task<Ok<PaginatedItems<CommentDto>>> GetsCommentBySlugAsync(
         [AsParameters] PaginationRequest paginationRequest,
         [AsParameters] PostServices services,
         string slug)
@@ -306,8 +306,15 @@ public static class PostsApi
             .Where(c => c.PostId == postId).OrderByDescending(x => x.CreatedDate)
             .Skip(offSet)
             .Take(pageSize)
+            .Select(x => new CommentDto
+            {
+                Id = x.Id,
+                Content = x.Content,
+                Username = services.Context.Users.FirstOrDefault(u => u.Id == x.UserId).UserName,
+                CreatedDate = x.CreatedDate,
+            })
             .ToListAsync();
-        return TypedResults.Ok(new PaginatedItems<Domain.AggregatesModel.CommentAggregate.Comment>(pageIndex, pageSize, totalItems, itemsOnPage));
+        return TypedResults.Ok(new PaginatedItems<CommentDto>(pageIndex, pageSize, totalItems, itemsOnPage));
     }
 
     #endregion
@@ -345,4 +352,13 @@ public class CategoryDto
     public Guid Id { get; set; }
     public string Title { get; set; }
     public string TagName { get; set; }
+}
+
+public class CommentDto
+{
+    public Guid Id { get; set; }
+    public string Content { get; set; }
+    public string Username { get; set; }
+    public DateTime? CreatedDate { get; set; }
+    public string CreatedDateStr => CreatedDate.HasValue ? CreatedDate?.ToString("dd-MM-yyyy") : null;
 }
