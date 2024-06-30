@@ -9,6 +9,8 @@ using Post.Api.Applications.Queries.Category;
 using Post.Api.Models;
 using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.UserAggregate;
+using static Contracts.Helper.DateTimeHelper;
+
 
 namespace Post.Api.Apis;
 
@@ -311,9 +313,11 @@ public static class PostsApi
                 Id = x.Id,
                 Content = x.Content,
                 Username = services.Context.Users.FirstOrDefault(u => u.Id == x.UserId).UserName,
-                CreatedDate = x.CreatedDate,
+                CreatedDate = x.CreatedDate.Value,
             })
             .ToListAsync();
+
+
         return TypedResults.Ok(new PaginatedItems<CommentDto>(pageIndex, pageSize, totalItems, itemsOnPage));
     }
 
@@ -359,6 +363,6 @@ public class CommentDto
     public Guid Id { get; set; }
     public string Content { get; set; }
     public string Username { get; set; }
-    public DateTime? CreatedDate { get; set; }
-    public string CreatedDateStr => CreatedDate.HasValue ? CreatedDate?.ToString("dd-MM-yyyy") : null;
+    public DateTime CreatedDate { get; set; }
+    public string CreatedDateStr => CreatedDate.ConvertToAgoString();
 }
