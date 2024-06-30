@@ -50,6 +50,7 @@ public static class PostsApi
 
         api.MapPost("/", CommentAsync);
         api.MapGet("/{postId}", GetsCommentByPostAsync);
+        api.MapGet("/comment-by-slug/{slug}", GetsCommentBySlugAsync);
 
         return api;
     }
@@ -285,6 +286,30 @@ public static class PostsApi
             .ToListAsync();
         return TypedResults.Ok(new PaginatedItems<Domain.AggregatesModel.CommentAggregate.Comment>(pageIndex, pageSize, totalItems, itemsOnPage));
     }
+
+    public static async Task<Ok<PaginatedItems<Domain.AggregatesModel.CommentAggregate.Comment>>> GetsCommentBySlugAsync(
+        [AsParameters] PaginationRequest paginationRequest,
+        [AsParameters] PostServices services,
+        string slug)
+    {
+        var pageSize = paginationRequest.PageSize;
+        var pageIndex = paginationRequest.PageIndex;
+        var offSet = pageIndex * pageSize - pageSize;
+
+        var postId = services.Context.Posts.FirstOrDefault(x => x.Slug == slug)?.Id;
+
+        var totalItems = await services.Context.Comments
+            .Where(c => c.PostId == postId)
+            .LongCountAsync();
+
+        var itemsOnPage = await services.Context.Comments
+            .Where(c => c.PostId == postId).OrderByDescending(x => x.CreatedDate)
+            .Skip(offSet)
+            .Take(pageSize)
+            .ToListAsync();
+        return TypedResults.Ok(new PaginatedItems<Domain.AggregatesModel.CommentAggregate.Comment>(pageIndex, pageSize, totalItems, itemsOnPage));
+    }
+
     #endregion
 }
 
