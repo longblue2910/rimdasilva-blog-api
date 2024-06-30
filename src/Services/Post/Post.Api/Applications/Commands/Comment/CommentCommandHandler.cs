@@ -17,6 +17,7 @@ public class CommentCommandHandler(ICommentRepository repository, IUserRepositor
             Content = request.Content,
             PostId  = request.PostId,
             UserId = user?.Id,
+            CreatedDate = DateTime.Now,
         };
 
         await _repository.Add(commentEntity);
