@@ -13,6 +13,7 @@ using Post.Api.Applications.Queries.Post;
 using Post.Api.Infrastructure;
 using Post.Infrastructure;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System;
 using System.Reflection;
 using System.Text;
 
@@ -155,32 +156,36 @@ public static class ServiceExtensions
         return app;
     }
 
-    public static void AddOAuth(this IServiceCollection services)
+    public static void AddOAuth(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
-        {
-            options.Authority = "https://localhost:5001"; // URL của IdentityServer
-            options.Audience = "postapi";
-            options.TokenValidationParameters = new TokenValidationParameters
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true
-            };
-        });
-        
+                options.Authority = configuration["IdentityServer:Authority"];
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidAudience = configuration["IdentityServer:Audience"],
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("ApiScope", policy =>
+            options.AddPolicy("ReadScopePolicy", policy =>
             {
                 policy.RequireAuthenticatedUser();
-                policy.RequireClaim("scope", "postapi");
+                policy.RequireClaim("scope", configuration["IdentityServer:Scopes:ReadScope"]);
+
+            });
+
+            options.AddPolicy("WriteScopePolicy", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireClaim("scope", configuration["IdentityServer:Scopes:WriteScope"]);
             });
         });
     }

@@ -26,7 +26,7 @@ internal sealed class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOpti
             options.SwaggerDoc(description.GroupName, CreateInfoForApiVersion(description));
         }
 
-        //ConfigureAuthorization(options);
+        ConfigureAuthorization(options);
     }
 
     private OpenApiInfo CreateInfoForApiVersion(ApiVersionDescription description)
@@ -156,6 +156,30 @@ internal sealed class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOpti
             }
         });
 
+        // Configure Swagger to use the JWT Bearer authentication
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            In = ParameterLocation.Header,
+            Description = "Please enter into field the word 'Bearer' followed by a space and the JWT value",
+            Name = "Authorization",
+            Type = SecuritySchemeType.ApiKey
+        });
+
+        options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                new string[] { }
+            }
+        });
+
         options.OperationFilter<AuthorizeCheckOperationFilter>([scopes.Keys.ToArray()]);
     }
 
@@ -178,13 +202,13 @@ internal sealed class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOpti
                 Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "oauth2" }
             };
 
-            operation.Security = new List<OpenApiSecurityRequirement>
-            {
+            operation.Security =
+            [
                 new()
                 {
                     [ oAuthScheme ] = scopes
                 }
-            };
+            ];
         }
     }
 }
