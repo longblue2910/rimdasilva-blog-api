@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Post.Api.Applications.Commands.Category;
 using Post.Api.Applications.Commands.Comment;
 using Post.Api.Applications.Commands.Post;
 using Post.Api.Applications.Commands.User;
@@ -24,11 +25,15 @@ public static class PostsApi
         return api;
     }
 
+
+
     public static RouteGroupBuilder MapCategoriesApiV1(this IEndpointRouteBuilder app)
     {
         var api = app.MapGroup("api/category").HasApiVersion(1.0);
 
         api.MapGet("/", GetsCategoryAsync);
+        api.MapPost("/", CreateCategoryAsync).DisableAntiforgery();
+
         return api;
     }
 
@@ -105,6 +110,15 @@ public static class PostsApi
 
         return TypedResults.Ok(result);
     }
+
+    public static async Task<Results<Ok, BadRequest<string>>> CreateCategoryAsync(
+    [FromForm] CreateCategoryCommand request,
+    [AsParameters] PostServices services)
+    {
+        _ = await services.Mediator.Send(request);
+        return TypedResults.Ok();
+    }
+
 
     #endregion
 

@@ -13,7 +13,7 @@ public static class ApplicationExtensions
            .MapCategoriesApiV1();
 
         app.NewVersionedApi("Post")
-            .MapPostsApiV1().RequireAuthorization("WriteScopePolicy").RequireAuthorization("ReadScope");
+            .MapPostsApiV1();
 
         app.NewVersionedApi("Comment")
             .MapCommentsApiV1();
