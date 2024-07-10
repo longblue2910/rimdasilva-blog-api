@@ -16,7 +16,7 @@ public class CreatePostCommandHandler(IPostRepository repository, IMapper mapper
 
         #region Upload image
 
-        if (request.ImageFile.Length > 0)
+        if (request.ImageFile?.Length > 0)
         {
             string uploadImagesFolder = RootPathConfig.UploadPath.PathImagePost;
             if (!Directory.Exists(uploadImagesFolder))
