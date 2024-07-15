@@ -31,9 +31,10 @@ namespace Identity.Api
                     // see https://docs.duendesoftware.com/identityserver/v6/fundamentals/resources/
                     options.EmitStaticAudienceClaim = true;
                 })
-                .AddInMemoryIdentityResources(Config.IdentityResources)
-                .AddInMemoryApiScopes(Config.ApiScopes)
-                .AddInMemoryClients(Config.Clients)
+                .AddInMemoryIdentityResources(Config.GetResources())
+                .AddInMemoryApiScopes(Config.GetApiScopes())
+                .AddInMemoryApiResources(Config.GetApis())
+                .AddInMemoryClients(Config.GetClients(builder.Configuration))
                 .AddAspNetIdentity<ApplicationUser>();
 
             builder.Services.AddAuthentication()

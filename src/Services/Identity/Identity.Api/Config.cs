@@ -1,75 +1,57 @@
 ﻿using Duende.IdentityServer.Models;
 
-namespace Identity.Api
+namespace Identity.Api;
+
+public static class Config
 {
-    public static class Config
+    public static IEnumerable<ApiResource> GetApis()
     {
-        public static IEnumerable<IdentityResource> IdentityResources =>
-            new IdentityResource[]
-            {
-                new IdentityResources.OpenId(),
-                new IdentityResources.Profile(),
-            };
+        return new List<ApiResource>
+        {
+            new("Posts", "Posts Service"),
+        };
+    }
 
-        public static IEnumerable<ApiScope> ApiScopes =>
-            new ApiScope[]
-            {
-                new ApiScope("scope1"),
-                new ApiScope("scope2"),
-                new ApiScope("postapi", "Post API")
-            };
+    // ApiScope is used to protect the API 
+    //The effect is the same as that of API resources in IdentityServer 3.x
+    public static IEnumerable<ApiScope> GetApiScopes()
+    {
+        return new List<ApiScope>
+        {
+            new("Posts", "Posts Service"),
+        };
+    }
 
-        public static IEnumerable<Client> Clients =>
-            new Client[]
-            {
-                // m2m client credentials flow client
-                new Client
+    // Identity resources are data like user ID, name, or email address of a user
+    // see: http://docs.identityserver.io/en/release/configuration/resources.html
+    public static IEnumerable<IdentityResource> GetResources()
+    {
+        return new List<IdentityResource>
+        {
+            new IdentityResources.OpenId(),
+            new IdentityResources.Profile()
+        };
+    }
+
+    // client want to access resources (aka scopes)
+    public static IEnumerable<Client> GetClients(IConfiguration configuration)
+    {
+        return new List<Client>
+        {
+            new() {
+                ClientId = "postswaggerui",
+                ClientName = "Post Swagger UI",
+                AllowedGrantTypes = GrantTypes.Implicit,
+                AllowAccessTokensViaBrowser = true,
+
+                RedirectUris = { $"{configuration["PostApiClient"]}/swagger/oauth2-redirect.html" },
+                PostLogoutRedirectUris = { $"{configuration["PostApiClient"]}/swagger/" },
+
+                AllowedScopes =
                 {
-                    ClientId = "m2m.client",
-                    ClientName = "Client Credentials Client",
-
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
-                    ClientSecrets = { new Secret("511536EF-F270-4058-80CA-1C89C192F69A".Sha256()) },
-
-                    AllowedScopes = { "scope1" }
-                },
-
-                // interactive client using code flow + pkce
-                new Client
-                {
-                    ClientId = "interactive",
-                    ClientSecrets = { new Secret("49C1A7E1-0C79-4A89-A3D6-A37998FB86B0".Sha256()) },
-
-                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-
-                    RedirectUris = { "https://localhost:44300/signin-oidc" },
-                    FrontChannelLogoutUri = "https://localhost:44300/signout-oidc",
-                    PostLogoutRedirectUris = { "https://localhost:44300/signout-callback-oidc" },
-
-                    AllowOfflineAccess = true,
-                    AllowedScopes = { "openid", "profile", "postapi" }
-                },
-                new Client
-                {
-                    ClientId = "post_client",
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
-                    ClientSecrets =
-                    {
-                        new Secret("secret".Sha256())
-                    },
-                    AllowedScopes = { "postapi" }
-                },
-                new Client
-                {
-                    ClientId = "postid",
-                    ClientSecrets = { new Secret("123456".Sha256()) },
-                
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
-                
-                    AllowedScopes = { "openid", "profile", "postapi" } // Thay đổi scopes tùy theo yêu cầu của ứng dụng
+                    "Posts"
                 }
-
-            };
-                    
+            }
+        };
     }
 }

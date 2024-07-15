@@ -8,16 +8,10 @@ using System.Text;
 
 namespace Post.Api.Extensions;
 
-internal sealed class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
+internal sealed class ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider, IConfiguration configuration) : IConfigureOptions<SwaggerGenOptions>
 {
-    private readonly IApiVersionDescriptionProvider _provider;
-    private readonly IConfiguration _configuration;
-
-    public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider, IConfiguration configuration)
-    {
-        _provider = provider;
-        _configuration = configuration;
-    }
+    private readonly IApiVersionDescriptionProvider _provider = provider;
+    private readonly IConfiguration _configuration = configuration;
 
     public void Configure(SwaggerGenOptions options)
     {

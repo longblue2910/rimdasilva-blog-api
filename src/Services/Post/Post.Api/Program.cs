@@ -15,8 +15,6 @@ builder.Services.ConfigureCors(builder.Configuration);
 
 builder.Services.AddAntiforgery();
 
-//builder.Services.AddOAuth(builder.Configuration);
-
 var withApiVersioning = builder.Services.AddApiVersioning();
 
 builder.AddDefaultOpenApi(withApiVersioning);
@@ -34,7 +32,6 @@ app.UseStaticFiles(new StaticFileOptions
             Path.Combine(builder.Environment.ContentRootPath, "Uploads")),
     RequestPath = "/Uploads"
 });
-
 
 app.UseRouting();
 

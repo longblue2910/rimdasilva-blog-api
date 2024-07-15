@@ -1,21 +1,19 @@
 ﻿using Asp.Versioning;
 using Contracts.Configurations;
 using Contracts.Identity;
+using Contracts.Responses;
+using Core.Attributes;
 using eShop.Ordering.API.Application.Behaviors;
 using FluentValidation;
-using Infrastructure.Extensions;
+using FluentValidation.AspNetCore;
 using MassTransit;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Post.Api.Application.Behaviors;
 using Post.Api.Applications.Queries.Post;
 using Post.Api.Infrastructure;
 using Post.Infrastructure;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System;
 using System.Reflection;
-using System.Text;
 
 namespace Post.Api.Extensions;
 public static class ServiceExtensions
@@ -23,6 +21,8 @@ public static class ServiceExtensions
     public static void AddApplicationServices(this IServiceCollection services)
     {
         services.AddControllers();
+        services.AddSignalR();
+
         services.AddEndpointsApiExplorer();
 
         services.AddSwaggerGen();
@@ -47,6 +47,20 @@ public static class ServiceExtensions
         });
 
         services.AddScoped<IPostQueries, PostQueries>();
+
+        services.AddHttpContextAccessor();
+
+        //Global filter
+        services.AddMvc(options =>
+        {
+            options.Filters.Add(typeof(HttpGlobalExceptionFilter));
+        }).AddFluentValidation(s =>
+        {
+            _ = s.RegisterValidatorsFromAssemblyContaining<Program>();
+        }).ConfigureApiBehaviorOptions(options =>
+        {
+            options.InvalidModelStateResponseFactory = CustomFluentResponse.FluentValidationResponse;
+        });
     }
 
     internal static void AddConfigurationSettings(this IServiceCollection services,
@@ -154,40 +168,6 @@ public static class ServiceExtensions
         }
 
         return app;
-    }
-
-    public static void AddOAuth(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.Authority = configuration["IdentityServer:Authority"];
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidAudience = configuration["IdentityServer:Audience"],
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ClockSkew = TimeSpan.Zero
-                };
-            });
-
-
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("ReadScopePolicy", policy =>
-            {
-                policy.RequireAuthenticatedUser();
-                policy.RequireClaim("scope", configuration["IdentityServer:Scopes:ReadScope"]);
-
-            });
-
-            options.AddPolicy("WriteScopePolicy", policy =>
-            {
-                policy.RequireAuthenticatedUser();
-                policy.RequireClaim("scope", configuration["IdentityServer:Scopes:WriteScope"]);
-            });
-        });
     }
 
 }
