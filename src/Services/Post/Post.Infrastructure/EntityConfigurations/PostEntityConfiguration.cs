@@ -14,7 +14,9 @@ public class PostEntityConfiguration : IEntityTypeConfiguration<Domain.Aggregate
             .HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
-            .HasDefaultValueSql("NEWID()");
+            //.HasDefaultValueSql("NEWID()");
+                        .HasDefaultValueSql("gen_random_uuid()");
+
 
 
         builder.Property(x => x.IsDelete)
@@ -27,7 +29,7 @@ public class PostEntityConfiguration : IEntityTypeConfiguration<Domain.Aggregate
 
         builder
             .Property(x => x.Description)
-            .HasColumnType("NVARCHAR(MAX)");
+                .HasColumnType("TEXT");
 
         builder
             .Property(x => x.ImageUrl)
@@ -35,7 +37,7 @@ public class PostEntityConfiguration : IEntityTypeConfiguration<Domain.Aggregate
 
 
         builder.Property(x => x.CreatedDate)
-                .HasDefaultValue(DateTime.Now);
+                .HasDefaultValue(DateTime.UtcNow.AddHours(7));
 
         builder.HasMany(x => x.Categories)
              .WithMany(x => x.Posts);

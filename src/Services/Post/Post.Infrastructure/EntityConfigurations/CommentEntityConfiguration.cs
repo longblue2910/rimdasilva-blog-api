@@ -15,14 +15,16 @@ public class CommentEntityConfiguration : IEntityTypeConfiguration<Comment>
             .HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
-            .HasDefaultValueSql("NEWID()");
+                                    .HasDefaultValueSql("gen_random_uuid()");
+
+        //.HasDefaultValueSql("NEWID()");
 
 
         builder.Property(x => x.IsDelete)
                 .HasDefaultValue(false);
 
         builder.Property(x => x.CreatedDate)
-                .HasDefaultValue(DateTime.Now);
+                .HasDefaultValue(DateTime.UtcNow.AddHours(7));
 
         builder
             .HasOne(c => c.Post)

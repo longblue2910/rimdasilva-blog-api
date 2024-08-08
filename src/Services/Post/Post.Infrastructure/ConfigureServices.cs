@@ -20,7 +20,7 @@ public static class ConfigureServices
     {
         services.AddDbContext<PostDbContext>(options =>
         {
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
                 builder => builder.MigrationsAssembly(typeof(PostDbContext).Assembly.FullName));
         });
 

@@ -19,8 +19,6 @@ var withApiVersioning = builder.Services.AddApiVersioning();
 
 builder.AddDefaultOpenApi(withApiVersioning);
 
-
-
 var app = builder.Build();
 
 app.UseHttpsRedirection();

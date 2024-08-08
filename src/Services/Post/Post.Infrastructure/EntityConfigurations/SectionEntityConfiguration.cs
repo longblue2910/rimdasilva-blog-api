@@ -1,23 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Post.Domain.AggregatesModel.CategoryAggregate;
+using Post.Domain.AggregatesModel.CourseAggregate;
 
 namespace Post.Infrastructure.EntityConfigurations;
 
-public class CategoryEntityConfiguration : IEntityTypeConfiguration<Category>
+public class SectionEntityConfiguration : IEntityTypeConfiguration<Section>
 {
-    public void Configure(EntityTypeBuilder<Category> builder)
+    public void Configure(EntityTypeBuilder<Section> builder)
     {
-        builder
-            .ToTable("Categories");
+        builder.ToTable("Section");
 
         builder
             .HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
+                                    //.HasDefaultValueSql("NEWID()");
                                     .HasDefaultValueSql("gen_random_uuid()");
 
-        //.HasDefaultValueSql("NEWID()");
+
 
         builder.Property(x => x.IsDelete)
                 .HasDefaultValue(false);
@@ -25,6 +25,10 @@ public class CategoryEntityConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(x => x.CreatedDate)
                 .HasDefaultValue(DateTime.UtcNow.AddHours(7));
 
-
+        builder
+            .HasOne(c => c.Course)
+            .WithMany(s => s.Sections)
+            .HasForeignKey(c => c.CourseId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
