@@ -65,10 +65,6 @@ public static class ServiceExtensions
         var jwtSettings = configuration.GetSection(nameof(JwtSettings))
             .Get<JwtSettings>();
         services.AddSingleton(jwtSettings);
-
-        var eventBusSettings = configuration.GetSection(nameof(EventBusSettings))
-                .Get<EventBusSettings>();
-        services.AddSingleton(eventBusSettings);
     }
 
     public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
