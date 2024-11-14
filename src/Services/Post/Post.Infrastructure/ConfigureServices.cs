@@ -2,45 +2,51 @@
 using Contracts.Interfaces;
 using Infrastructure.Common;
 using Infrastructure.Security;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.CommentAggregate;
 using Post.Domain.AggregatesModel.PostAggregate;
 using Post.Domain.AggregatesModel.UserAggregate;
 using Post.Infrastructure.Repositories;
 
-namespace Post.Infrastructure;
-
-public static class ConfigureServices
+namespace Post.Infrastructure
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static class ConfigureServices
     {
-        services.AddDbContext<PostDbContext>(options =>
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
-                builder => builder.MigrationsAssembly(typeof(PostDbContext).Assembly.FullName));
-        });
+            // Cấu hình MongoDB
+            services.Configure<MongoDbSettings>(configuration.GetSection("MongoDbSettings"));
 
-        services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<PostDbContext>()
-            .AddDefaultTokenProviders();
+            // Cấu hình MongoClient
+            services.AddSingleton<IMongoClient>(sp =>
+            {
+                var settings = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+                return new MongoClient(settings.ConnectionString);
+            });
 
-        services.AddTransient<UserManager<ApplicationUser>>();
+            // Cấu hình MongoDbContext
+            services.AddScoped<MongoDbContext>();
 
-        services.AddTransient<IPasswordHasher, PasswordHasher>();
+            // Đăng ký các repository
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IPostRepository, PostRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ICommentRepository, CommentRepository>();
 
-        services.AddScoped<IUserRepository, UserRepository>();
 
-        services.AddScoped<ICategoryRepository, CategoryRepository>();
-        services.AddScoped<ICommentRepository, CommentRepository>();
-        services.AddScoped<IPostRepository, PostRepository>();
+            // Đăng ký các dịch vụ chung
+            services.AddScoped(typeof(IRepositoryBaseAsync<,>), typeof(RepositoryBase<,>));
+            services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
 
-        services.AddScoped(typeof(IRepositoryBaseAsync<,>), typeof(RepositoryBase<,>));
-        services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
+            // Cấu hình quản lý người dùng
+            services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IPasswordHasher, PasswordHasher>();
 
-        return services;
+            return services;
+        }
     }
 }

@@ -1,33 +1,27 @@
-﻿using Contracts.Common.Interfaces;
+﻿using MongoDB.Driver;
 using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.PostAggregate;
 
 namespace Post.Infrastructure.Repositories;
 
-public class PostRepository(IRepositoryBaseAsync<Domain.AggregatesModel.PostAggregate.Post, PostDbContext> repositoryBase,
-    IRepositoryBaseAsync<Category, PostDbContext> categoryRepo, IUnitOfWork<PostDbContext> unitOfWork, PostDbContext context) : IPostRepository
+public class PostRepository(MongoDbContext context) : IPostRepository
 {
-    private readonly IRepositoryBaseAsync<Domain.AggregatesModel.PostAggregate.Post, PostDbContext> _repositoryBase = repositoryBase;
-    private readonly IRepositoryBaseAsync<Category, PostDbContext> _categoryRepo = categoryRepo;
-    private readonly IUnitOfWork<PostDbContext> _unitOfWork = unitOfWork;
-    private readonly PostDbContext _context = context;
+    private readonly IMongoCollection<Post.Domain.AggregatesModel.PostAggregate.Post> _posts = context.Posts;
+    private readonly IMongoCollection<Category> _categories = context.Categories;
 
-    public async Task<Domain.AggregatesModel.PostAggregate.Post> Add(Domain.AggregatesModel.PostAggregate.Post post)
-    {     
-        await _repositoryBase.CreateAsync(post);
+    public async Task<Post.Domain.AggregatesModel.PostAggregate.Post> Add(Post.Domain.AggregatesModel.PostAggregate.Post post)
+    {
+        await _posts.InsertOneAsync(post);
         return post;
     }
 
-    public async Task AddCategorieByPost(Domain.AggregatesModel.PostAggregate.Post postEntity, List<Guid> Ids)
+    public async Task AddCategorieByPost(Post.Domain.AggregatesModel.PostAggregate.Post postEntity, List<string> ids)
     {
-        await _context.Entry(postEntity)
-                .Collection(i => i.Categories).LoadAsync();
-
-        var listCate = _categoryRepo.FindByCondition(x => Ids.Contains(x.Id)).ToList();
+        var listCate = await _categories.Find(x => ids.Contains(x.Id)).ToListAsync();
 
         foreach (var item in listCate)
         {
-            //Check exist
+            // Check if category already exists in post
             var isExist = postEntity.Categories.Any(x => x.Id == item.Id);
             if (!isExist)
             {
@@ -35,27 +29,28 @@ public class PostRepository(IRepositoryBaseAsync<Domain.AggregatesModel.PostAggr
             }
         }
 
-        await _unitOfWork.CommitAsync();
+        // Update post with new categories
+        await _posts.ReplaceOneAsync(x => x.Id == postEntity.Id, postEntity);
     }
 
-    public async Task<Domain.AggregatesModel.PostAggregate.Post> FindByIdAsync(string id)
+    public async Task<Post.Domain.AggregatesModel.PostAggregate.Post> FindByIdAsync(string id)
     {
-        return await _repositoryBase.FindOneAsync(x => x.Id.ToString() == id);
+        return await _posts.Find(x => x.Id.ToString() == id).FirstOrDefaultAsync();
     }
 
-    public async Task<Domain.AggregatesModel.PostAggregate.Post> FindBySlugAsync(string slug)
+    public async Task<Post.Domain.AggregatesModel.PostAggregate.Post> FindBySlugAsync(string slug)
     {
-        return await _repositoryBase.FindOneAsync(x => x.Slug == slug);
+        return await _posts.Find(x => x.Slug == slug).FirstOrDefaultAsync();
     }
 
-    public async Task Remove(Domain.AggregatesModel.PostAggregate.Post post)
+    public async Task Remove(Post.Domain.AggregatesModel.PostAggregate.Post post)
     {
-        await _repositoryBase.DeleteAsync(post);
+        await _posts.DeleteOneAsync(x => x.Id == post.Id);
     }
 
-    public async Task<Domain.AggregatesModel.PostAggregate.Post> Update(Domain.AggregatesModel.PostAggregate.Post postEntity)
-    {     
-        await _repositoryBase.UpdateAsync(postEntity, x => x.Id == postEntity.Id);
+    public async Task<Post.Domain.AggregatesModel.PostAggregate.Post> Update(Post.Domain.AggregatesModel.PostAggregate.Post postEntity)
+    {
+        await _posts.ReplaceOneAsync(x => x.Id == postEntity.Id, postEntity);
         return postEntity;
     }
 }

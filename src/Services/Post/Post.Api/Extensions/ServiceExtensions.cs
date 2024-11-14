@@ -10,8 +10,6 @@ using MassTransit;
 using Microsoft.Extensions.Options;
 using Post.Api.Application.Behaviors;
 using Post.Api.Applications.Queries.Post;
-using Post.Api.Infrastructure;
-using Post.Infrastructure;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 
@@ -20,6 +18,7 @@ public static class ServiceExtensions
 {
     public static void AddApplicationServices(this IServiceCollection services)
     {
+
         services.AddControllers();
         services.AddSignalR();
 
@@ -29,8 +28,6 @@ public static class ServiceExtensions
 
         services.Configure<RouteOptions>(options
                 => options.LowercaseQueryStrings = true);
-
-        services.AddMigration<PostDbContext, PostContextSeed>();
 
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
@@ -43,7 +40,6 @@ public static class ServiceExtensions
 
             cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
             cfg.AddOpenBehavior(typeof(ValidatorBehavior<,>));
-            cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
         });
 
         services.AddScoped<IPostQueries, PostQueries>();

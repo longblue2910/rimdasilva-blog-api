@@ -1,41 +1,36 @@
-﻿using Contracts.Common.Interfaces;
-using Microsoft.AspNetCore.Identity;
+﻿using MongoDB.Driver;
 using Post.Domain.AggregatesModel.UserAggregate;
 
 namespace Post.Infrastructure.Repositories;
 
-public class UserRepository(IRepositoryBaseAsync<ApplicationUser, PostDbContext> repositoryBaseAsync,
-    IUnitOfWork<PostDbContext> unitOfWork,
-    UserManager<ApplicationUser> userManager) : IUserRepository
+public class UserRepository(MongoDbContext context) : IUserRepository
 {
-    private readonly IRepositoryBaseAsync<ApplicationUser, PostDbContext> _repositoryBaseAsync = repositoryBaseAsync;
-    private readonly IUnitOfWork<PostDbContext> _unitOfWork = unitOfWork;
-    private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly IMongoCollection<User> _users = context.Users;
 
-    public async Task<ApplicationUser> Add(ApplicationUser user)
+    public async Task<User> Add(User user)
     {
-        await _userManager.CreateAsync(user);
-
+        await _users.InsertOneAsync(user);
         return user;
     }
 
-    public async Task<ApplicationUser> FindByIdAsync(string id)
+    public async Task<User> FindByIdAsync(string id)
     {
-        return await _repositoryBaseAsync.FindOneAsync(x => x.Id == id);
+        return await _users.Find(x => x.Id == id).FirstOrDefaultAsync();
     }
 
-    public async Task<ApplicationUser> FindByUsernameAsync(string username)
+    public async Task<User> FindByUsernameAsync(string username)
     {
-        return await _repositoryBaseAsync.FindOneAsync(x => x.UserName == username);
+        return await _users.Find(x => x.Username == username).FirstOrDefaultAsync();
     }
 
     public async Task<bool> IsUserValidForCreation(string userName)
     {
-        return await _repositoryBaseAsync.FindOneAsync(x => x.UserName == userName) == null;
+        var existingUser = await _users.Find(x => x.Username == userName).FirstOrDefaultAsync();
+        return existingUser == null;
     }
 
-    public async Task Update(ApplicationUser user)
+    public async Task Update(User user)
     {
-        await _repositoryBaseAsync.UpdateAsync(user, x => x.Id == user.Id);
+        await _users.ReplaceOneAsync(x => x.Id == user.Id, user);
     }
 }

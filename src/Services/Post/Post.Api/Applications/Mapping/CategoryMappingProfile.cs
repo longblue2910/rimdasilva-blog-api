@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Post.Api.Applications.Commands.Category;
+using Post.Api.Applications.Commands.Categories;
 using Post.Domain.AggregatesModel.CategoryAggregate;
 
 namespace Post.Api.Applications.Mapping;

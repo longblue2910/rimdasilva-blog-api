@@ -1,31 +1,30 @@
-﻿using Contracts.Common.Interfaces;
-using Microsoft.EntityFrameworkCore;
+﻿using MongoDB.Driver;
 using Post.Domain.AggregatesModel.CommentAggregate;
 
 namespace Post.Infrastructure.Repositories;
 
-public class CommentRepository(IRepositoryBaseAsync<Comment, PostDbContext> repositoryBase) : ICommentRepository
+public class CommentRepository(MongoDbContext context) : ICommentRepository
 {
-    private readonly IRepositoryBaseAsync<Comment, PostDbContext> _repositoryBase = repositoryBase;
+    private readonly IMongoCollection<Comment> _comments = context.Comments;
 
     public async Task<Comment> Add(Comment comment)
     {
-        await _repositoryBase.CreateAsync(comment);
-        return comment; 
+        await _comments.InsertOneAsync(comment);
+        return comment;
     }
 
-    public async Task<IEnumerable<Comment>> FindByIdAsync(Guid postId)
+    public async Task<IEnumerable<Comment>> FindByIdAsync(string postId)
     {
-        return await _repositoryBase.FindByCondition(x => x.PostId == postId).ToListAsync();
+        return await _comments.Find(x => x.PostId == postId).ToListAsync();
     }
 
     public async Task Remove(Comment comment)
     {
-        await _repositoryBase.DeleteAsync(comment);
+        await _comments.DeleteOneAsync(x => x.Id == comment.Id);
     }
 
     public async Task Update(Comment comment)
     {
-        await _repositoryBase.UpdateAsync(comment, x => x.Id == comment.Id);
+        await _comments.ReplaceOneAsync(x => x.Id == comment.Id, comment);
     }
 }

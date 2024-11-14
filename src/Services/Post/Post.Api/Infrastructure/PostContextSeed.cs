@@ -1,24 +1,30 @@
-﻿using Post.Domain.AggregatesModel.CategoryAggregate;
+﻿using MongoDB.Driver;
+using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Infrastructure;
 
 namespace Post.Api.Infrastructure;
 
-public class PostContextSeed : IDbSeeder<PostDbContext>
+public class PostContextSeed(MongoDbContext context)
 {
-    public async Task SeedAsync(PostDbContext context)
+    private readonly IMongoCollection<Category> _categoryCollection = context.Categories;
+
+    public async Task SeedAsync()
     {
-        if (!context.Categories.Any())
+        // Kiểm tra xem collection Category đã có dữ liệu chưa
+        var existingCategories = await _categoryCollection.Find(FilterDefinition<Category>.Empty).ToListAsync();
+
+        if (existingCategories.Count == 0)
         {
-            context.Categories.AddRange(GetCategories());
+            // Nếu chưa có, thêm các category vào collection
+            await _categoryCollection.InsertManyAsync(GetCategories());
         }
-        await context.SaveChangesAsync();
     }
 
     private static IEnumerable<Category> GetCategories()
     {
         return
         [
-            new()
+            new Category
             {
                 Title = "C#",
                 Slug = "csharp",
@@ -26,16 +32,15 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
                 OrderIndex = 1,
                 TagName = "#CSharp"
             },
-            new()
+            new Category
             {
-                 Title = ".Net Core",
-                 Slug = "netcore",
-                 ImgUrl = "netcore.png",
-                 OrderIndex = 2,
-                 TagName = "#NetCore"
-
+                Title = ".Net Core",
+                Slug = "netcore",
+                ImgUrl = "netcore.png",
+                OrderIndex = 2,
+                TagName = "#NetCore"
             },
-            new()
+            new Category
             {
                 Title = "SQL",
                 Slug = "sql",
@@ -43,7 +48,7 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
                 OrderIndex = 3,
                 TagName = "#SQL"
             },
-            new()
+            new Category
             {
                 Title = "DevOps",
                 Slug = "devops",
@@ -51,7 +56,7 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
                 OrderIndex = 4,
                 TagName = "#DevOps"
             },
-            new()
+            new Category
             {
                 Title = "Design",
                 Slug = "design",
@@ -59,15 +64,14 @@ public class PostContextSeed : IDbSeeder<PostDbContext>
                 OrderIndex = 5,
                 TagName = "#Design"
             },
-            new()
+            new Category
             {
                 Title = "Khác",
                 Slug = "other",
                 ImgUrl = "other.png",
                 OrderIndex = 6,
                 TagName = "#Khác"
-            },
+            }
         ];
     }
-
 }

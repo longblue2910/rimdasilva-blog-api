@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.FileProviders;
 using Post.Api.Extensions;
+using Post.Api.Infrastructure;
 using Post.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +20,16 @@ var withApiVersioning = builder.Services.AddApiVersioning();
 
 builder.AddDefaultOpenApi(withApiVersioning);
 
+builder.Services.AddTransient<PostContextSeed>();
+
 var app = builder.Build();
+
+// Seed dữ liệu khi ứng dụng khởi động
+using (var scope = app.Services.CreateScope())
+{
+    var mongoContextSeed = scope.ServiceProvider.GetRequiredService<PostContextSeed>();
+    await mongoContextSeed.SeedAsync();
+}
 
 app.UseHttpsRedirection();
 

@@ -1,16 +1,14 @@
 ﻿using MediatR;
 using Post.Api.Applications.Queries.Post;
-using Post.Infrastructure;
 
 namespace Post.Api.Apis;
 
 public class PostServices(
     IMediator mediator,
     ILogger<PostServices> logger,
-    IPostQueries postQueries,
-    PostDbContext context)
+    IPostQueries postQueries
+    )
 {
-    public PostDbContext Context { get; set; } = context;
 
     public IPostQueries PostQueries { get; set; } = postQueries;
 

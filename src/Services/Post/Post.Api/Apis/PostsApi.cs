@@ -1,13 +1,11 @@
 ﻿using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Post.Api.Applications.Commands.Category;
+using Post.Api.Applications.Commands.Categories;
 using Post.Api.Applications.Commands.Comment;
 using Post.Api.Applications.Commands.Post;
 using Post.Api.Applications.Commands.User;
 using Post.Api.Applications.Queries.Category;
-using Post.Api.Models;
 using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.UserAggregate;
 using static Contracts.Helper.DateTimeHelper;
@@ -46,7 +44,7 @@ public static class PostsApi
 
         api.MapGet("/{id}", GetPostByIdAsync);
         api.MapGet("/get-by-slug/{slug}", GetPostBySlugAsync);
-        api.MapPost("/paging", GetsPostAsync);
+        //api.MapPost("/paging", GetsPostAsync);
 
         return api;
     }
@@ -56,8 +54,8 @@ public static class PostsApi
         var api = app.MapGroup("api/comment").HasApiVersion(1.0);
 
         api.MapPost("/", CommentAsync);
-        api.MapGet("/{postId}", GetsCommentByPostAsync);
-        api.MapGet("/comment-by-slug/{slug}", GetsCommentBySlugAsync);
+        //api.MapGet("/{postId}", GetsCommentByPostAsync);
+        //api.MapGet("/comment-by-slug/{slug}", GetsCommentBySlugAsync);
 
         return api;
     }
@@ -188,57 +186,57 @@ public static class PostsApi
         return TypedResults.Ok(result);
     }
 
-    public static async Task<Ok<PaginatedItems<PostDto>>> GetsPostAsync(
-        [AsParameters] PaginationRequest paginationRequest,
-        [AsParameters] PostServices services,
-        [FromBody] SearchPostRequest request)
-    {
-        var pageSize = paginationRequest.PageSize;
-        var pageIndex = paginationRequest.PageIndex;
-        var offSet = pageIndex * pageSize - pageSize;
+    //public static async Task<Ok<PaginatedItems<PostDto>>> GetsPostAsync(
+    //    [AsParameters] PaginationRequest paginationRequest,
+    //    [AsParameters] PostServices services,
+    //    [FromBody] SearchPostRequest request)
+    //{
+    //    var pageSize = paginationRequest.PageSize;
+    //    var pageIndex = paginationRequest.PageIndex;
+    //    var offSet = pageIndex * pageSize - pageSize;
 
-        var totalItems = await services.Context.Posts
-            .Where
-            (
-               c => (!request.CategoryId.HasValue || c.Categories.Any(x => (x.Id == request.CategoryId))) &&
-                    (string.IsNullOrEmpty(request.Slug) || c.Categories.Any(x => (x.Slug.StartsWith(request.Slug)))) &&
-                    (string.IsNullOrEmpty(request.Title) || c.Title.StartsWith(request.Title))
-            )
-            .LongCountAsync();
+    //    var totalItems = await services.Context.Posts
+    //        .Where
+    //        (
+    //           c => (!request.CategoryId.HasValue || c.Categories.Any(x => (x.Id == request.CategoryId))) &&
+    //                (string.IsNullOrEmpty(request.Slug) || c.Categories.Any(x => (x.Slug.StartsWith(request.Slug)))) &&
+    //                (string.IsNullOrEmpty(request.Title) || c.Title.StartsWith(request.Title))
+    //        )
+    //        .LongCountAsync();
 
-        var itemsOnPage = await services.Context.Posts
-            .Where
-            (
-               c => (c.Categories.Any(x => (!request.CategoryId.HasValue || x.Id == request.CategoryId))) &&
-                    (string.IsNullOrEmpty(request.Slug) || c.Categories.Any(x => (x.Slug.StartsWith(request.Slug)))) &&
-                    (string.IsNullOrEmpty(request.Title) || c.Title.StartsWith(request.Title))
-            ).Skip(offSet)
-            .Take(pageSize)
-            .Include(x => x.Categories)
-            .Select(x => new PostDto
-            {
-                Slug = x.Slug,
-                Title = x.Title,
-                Description = x.Description,
-                ImageUrl = x.ImageUrl,
-                Id = x.Id,
-                CreatedDate = x.CreatedDate,
-                Categories = x.Categories.Select(c => new CategoryDto
-                {
-                    Id = c.Id,
-                    TagName = c.TagName,
-                    Title = c.Title,
-                }).ToList(),
-            })
-            .ToListAsync();
+    //    var itemsOnPage = await services.Context.Posts
+    //        .Where
+    //        (
+    //           c => (c.Categories.Any(x => (!request.CategoryId.HasValue || x.Id == request.CategoryId))) &&
+    //                (string.IsNullOrEmpty(request.Slug) || c.Categories.Any(x => (x.Slug.StartsWith(request.Slug)))) &&
+    //                (string.IsNullOrEmpty(request.Title) || c.Title.StartsWith(request.Title))
+    //        ).Skip(offSet)
+    //        .Take(pageSize)
+    //        .Include(x => x.Categories)
+    //        .Select(x => new PostDto
+    //        {
+    //            Slug = x.Slug,
+    //            Title = x.Title,
+    //            Description = x.Description,
+    //            ImageUrl = x.ImageUrl,
+    //            Id = x.Id,
+    //            CreatedDate = x.CreatedDate,
+    //            Categories = x.Categories.Select(c => new CategoryDto
+    //            {
+    //                Id = c.Id,
+    //                TagName = c.TagName,
+    //                Title = c.Title,
+    //            }).ToList(),
+    //        })
+    //        .ToListAsync();
 
-        foreach (var item in itemsOnPage)
-        {
-            item.Description = ShortenDescription(item.Description, 200);
-        }
+    //    foreach (var item in itemsOnPage)
+    //    {
+    //        item.Description = ShortenDescription(item.Description, 200);
+    //    }
 
-        return TypedResults.Ok(new PaginatedItems<PostDto>(pageIndex, pageSize, totalItems, itemsOnPage));
-    }
+    //    return TypedResults.Ok(new PaginatedItems<PostDto>(pageIndex, pageSize, totalItems, itemsOnPage));
+    //}
 
     private static string ShortenDescription(string description, int maxLength)
     {
@@ -282,58 +280,58 @@ public static class PostsApi
     }
 
 
-    public static async Task<Ok<PaginatedItems<Domain.AggregatesModel.CommentAggregate.Comment>>> GetsCommentByPostAsync(
-        [AsParameters] PaginationRequest paginationRequest,
-        [AsParameters] PostServices services,
-        Guid postId)
-    {
-        var pageSize = paginationRequest.PageSize;
-        var pageIndex = paginationRequest.PageIndex;
-        var offSet = pageIndex * pageSize - pageSize;
+    //public static async Task<Ok<PaginatedItems<Domain.AggregatesModel.CommentAggregate.Comment>>> GetsCommentByPostAsync(
+    //    [AsParameters] PaginationRequest paginationRequest,
+    //    [AsParameters] PostServices services,
+    //    Guid postId)
+    //{
+    //    var pageSize = paginationRequest.PageSize;
+    //    var pageIndex = paginationRequest.PageIndex;
+    //    var offSet = pageIndex * pageSize - pageSize;
 
-        var totalItems = await services.Context.Comments
-            .Where(c => c.PostId == postId)
-            .LongCountAsync();
+    //    var totalItems = await services.Context.Comments
+    //        .Where(c => c.PostId == postId)
+    //        .LongCountAsync();
 
-        var itemsOnPage = await services.Context.Comments
-            .Where(c => c.PostId == postId).OrderByDescending(x => x.CreatedDate)
-            .Skip(offSet)
-            .Take(pageSize)
-            .ToListAsync();
-        return TypedResults.Ok(new PaginatedItems<Domain.AggregatesModel.CommentAggregate.Comment>(pageIndex, pageSize, totalItems, itemsOnPage));
-    }
+    //    var itemsOnPage = await services.Context.Comments
+    //        .Where(c => c.PostId == postId).OrderByDescending(x => x.CreatedDate)
+    //        .Skip(offSet)
+    //        .Take(pageSize)
+    //        .ToListAsync();
+    //    return TypedResults.Ok(new PaginatedItems<Domain.AggregatesModel.CommentAggregate.Comment>(pageIndex, pageSize, totalItems, itemsOnPage));
+    //}
 
-    public static async Task<Ok<PaginatedItems<CommentDto>>> GetsCommentBySlugAsync(
-        [AsParameters] PaginationRequest paginationRequest,
-        [AsParameters] PostServices services,
-        string slug)
-    {
-        var pageSize = paginationRequest.PageSize;
-        var pageIndex = paginationRequest.PageIndex;
-        var offSet = pageIndex * pageSize - pageSize;
+    //public static async Task<Ok<PaginatedItems<CommentDto>>> GetsCommentBySlugAsync(
+    //    [AsParameters] PaginationRequest paginationRequest,
+    //    [AsParameters] PostServices services,
+    //    string slug)
+    //{
+    //    var pageSize = paginationRequest.PageSize;
+    //    var pageIndex = paginationRequest.PageIndex;
+    //    var offSet = pageIndex * pageSize - pageSize;
 
-        var postId = services.Context.Posts.FirstOrDefault(x => x.Slug == slug)?.Id;
+    //    var postId = services.Context.Posts.FirstOrDefault(x => x.Slug == slug)?.Id;
 
-        var totalItems = await services.Context.Comments
-            .Where(c => c.PostId == postId)
-            .LongCountAsync();
+    //    var totalItems = await services.Context.Comments
+    //        .Where(c => c.PostId == postId)
+    //        .LongCountAsync();
 
-        var itemsOnPage = await services.Context.Comments
-            .Where(c => c.PostId == postId).OrderByDescending(x => x.CreatedDate)
-            .Skip(offSet)
-            .Take(pageSize)
-            .Select(x => new CommentDto
-            {
-                Id = x.Id,
-                Content = x.Content,
-                Username = services.Context.Users.FirstOrDefault(u => u.Id == x.UserId).UserName,
-                CreatedDate = x.CreatedDate.Value,
-            })
-            .ToListAsync();
+    //    var itemsOnPage = await services.Context.Comments
+    //        .Where(c => c.PostId == postId).OrderByDescending(x => x.CreatedDate)
+    //        .Skip(offSet)
+    //        .Take(pageSize)
+    //        .Select(x => new CommentDto
+    //        {
+    //            Id = x.Id,
+    //            Content = x.Content,
+    //            Username = services.Context.Users.FirstOrDefault(u => u.Id == x.UserId).UserName,
+    //            CreatedDate = x.CreatedDate.Value,
+    //        })
+    //        .ToListAsync();
 
 
-        return TypedResults.Ok(new PaginatedItems<CommentDto>(pageIndex, pageSize, totalItems, itemsOnPage));
-    }
+    //    return TypedResults.Ok(new PaginatedItems<CommentDto>(pageIndex, pageSize, totalItems, itemsOnPage));
+    //}
 
     #endregion
 }

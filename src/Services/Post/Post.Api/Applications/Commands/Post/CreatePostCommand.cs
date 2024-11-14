@@ -8,5 +8,5 @@ public class CreatePostCommand : IRequest<bool>
     public string Description { get; set; }
     public IFormFile ImageFile { get; set; }
     public string Slug { get; set; }
-    public List<Guid> CategoryIds { get; set; } = [];
+    public List<string> CategoryIds { get; set; } = [];
 }

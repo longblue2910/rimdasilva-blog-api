@@ -1,28 +1,32 @@
-﻿using Contracts.Common.Interfaces;
-using Microsoft.EntityFrameworkCore;
+﻿using MongoDB.Driver;
 using Post.Domain.AggregatesModel.CategoryAggregate;
 
-namespace Post.Infrastructure.Repositories;
-
-public class CategoryRepository(IRepositoryBaseAsync<Category, PostDbContext> repositoryBaseAsync,
-    IUnitOfWork<PostDbContext> unitOfWork) : ICategoryRepository
+namespace Post.Infrastructure.Repositories
 {
-    private readonly IRepositoryBaseAsync<Category, PostDbContext> _repositoryBaseAsync = repositoryBaseAsync;
-    private readonly IUnitOfWork<PostDbContext> _unitOfWork = unitOfWork;
-
-    public async Task<Category> Add(Category category)
+    public class CategoryRepository(MongoDbContext context) : ICategoryRepository
     {
-        await _repositoryBaseAsync.CreateAsync(category);
-        return category;
-    }
+        private readonly IMongoCollection<Category> _categories = context.Categories;
 
-    public async Task<List<Category>> GetCategories(int size)
-    {
-        return await _repositoryBaseAsync.FindByCondition(x => true).OrderBy(x => x.OrderIndex).Take(size).ToListAsync(cancellationToken: default);
-    }
+        // Thêm một category vào MongoDB
+        public async Task<Category> Add(Category category)
+        {
+            await _categories.InsertOneAsync(category);
+            return category;
+        }
 
-    public async Task Update(Category category)
-    {
-        await _repositoryBaseAsync.UpdateAsync(category, x => x.Id == category.Id);
+        // Lấy danh sách categories với giới hạn size
+        public async Task<List<Category>> GetCategories(int size)
+        {
+            return await _categories.Find(FilterDefinition<Category>.Empty)
+                .SortBy(x => x.OrderIndex)
+                .Limit(size)
+                .ToListAsync();
+        }
+
+        // Cập nhật category
+        public async Task Update(Category category)
+        {
+            await _categories.ReplaceOneAsync(x => x.Id == category.Id, category);
+        }
     }
 }

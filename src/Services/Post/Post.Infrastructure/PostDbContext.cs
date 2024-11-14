@@ -1,85 +1,24 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
+﻿using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.CommentAggregate;
 using Post.Domain.AggregatesModel.UserAggregate;
-using Post.Infrastructure.EntityConfigurations;
-using System.Data;
 
 namespace Post.Infrastructure;
 
-public class PostDbContext : IdentityDbContext<ApplicationUser>
+public class MongoDbContext
 {
-    public DbSet<Category> Categories { get; set; }
-    public DbSet<Comment> Comments { get; set; }
-    public DbSet<Domain.AggregatesModel.PostAggregate.Post> Posts { get; set; }
+    private readonly IMongoDatabase _database;
 
-    private IDbContextTransaction _currentTransaction;
-    public PostDbContext(DbContextOptions<PostDbContext> options) : base(options) { }
-
-    public IDbContextTransaction GetCurrentTransaction() => _currentTransaction;
-    public bool HasActiveTransaction => _currentTransaction != null;
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public MongoDbContext(IConfiguration configuration)
     {
-        modelBuilder.HasDefaultSchema("post"); 
-        modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
-        modelBuilder.ApplyConfiguration(new CategoryEntityConfiguration());
-        modelBuilder.ApplyConfiguration(new PostEntityConfiguration());
-        modelBuilder.ApplyConfiguration(new CommentEntityConfiguration());
-
-        base.OnModelCreating(modelBuilder);
-
+        var connectionString = configuration.GetValue<string>("MongoDbSettings:ConnectionString");
+        var client = new MongoClient(connectionString);
+        _database = client.GetDatabase("PostDb");
     }
 
-    public async Task<IDbContextTransaction> BeginTransactionAsync()
-    {
-        if (_currentTransaction != null) return null;
-
-        _currentTransaction = await Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-
-        return _currentTransaction;
-    }
-
-    public async Task CommitTransactionAsync(IDbContextTransaction transaction)
-    {
-        if (transaction == null) throw new ArgumentNullException(nameof(transaction));
-        if (transaction != _currentTransaction) throw new InvalidOperationException($"Transaction {transaction.TransactionId} is not current");
-
-        try
-        {
-            await SaveChangesAsync();
-            await transaction.CommitAsync();
-        }
-        catch
-        {
-            RollbackTransaction();
-            throw;
-        }
-        finally
-        {
-            if (_currentTransaction != null)
-            {
-                _currentTransaction.Dispose();
-                _currentTransaction = null;
-            }
-        }
-    }
-
-    public void RollbackTransaction()
-    {
-        try
-        {
-            _currentTransaction?.Rollback();
-        }
-        finally
-        {
-            if (_currentTransaction != null)
-            {
-                _currentTransaction.Dispose();
-                _currentTransaction = null;
-            }
-        }
-    }
+    public IMongoCollection<Category> Categories => _database.GetCollection<Category>("Categories");
+    public IMongoCollection<Comment> Comments => _database.GetCollection<Comment>("Comments");
+    public IMongoCollection<Post.Domain.AggregatesModel.PostAggregate.Post> Posts => _database.GetCollection<Post.Domain.AggregatesModel.PostAggregate.Post>("Posts");
+    public IMongoCollection<User> Users => _database.GetCollection<User>("Users");
 }

@@ -1,12 +1,34 @@
-﻿namespace Post.Domain.AggregatesModel.CategoryAggregate;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using Post.Domain.SeedWork;
 
-public class Category : EntityAuditBase<Guid>
+namespace Post.Domain.AggregatesModel.CategoryAggregate;
+
+
+public class Category : MongoEntity
 {
-    public string Slug { get; set; }
-    public string Title { get; set; }
-    public string ImgUrl { get; set; }
-    public int OrderIndex { get; set; }
-    public string TagName { get; set; }
-    public virtual ICollection<PostAggregate.Post> Posts { get; set; }
+    // Constructor không nhận tham số Id, MongoDB sẽ tự động sinh Id khi insert
+    public Category()
+    {
+        // Đặt CreatedDate và LastModifiedDate theo thời gian hiện tại
+        CreatedDate = DateTime.UtcNow;
+    }
 
+    [BsonElement("slug")]
+    public string Slug { get; set; }
+
+    [BsonElement("title")]
+    public string Title { get; set; }
+
+    [BsonElement("imgUrl")]
+    public string ImgUrl { get; set; }
+
+    [BsonElement("orderIndex")]
+    public int OrderIndex { get; set; }
+
+    [BsonElement("tagName")]
+    public string TagName { get; set; }
+
+    [BsonElement("posts")]
+    public List<PostAggregate.Post> Posts { get; set; }
 }

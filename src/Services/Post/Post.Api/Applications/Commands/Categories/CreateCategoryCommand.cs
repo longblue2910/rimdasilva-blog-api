@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Post.Api.Applications.Commands.Category;
+namespace Post.Api.Applications.Commands.Categories;
 
 public class CreateCategoryCommand : IRequest<bool>
 {

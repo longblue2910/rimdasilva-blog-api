@@ -7,6 +7,6 @@ public interface IPostRepository
     Task<Post> FindByIdAsync(string id);
     Task<Post> FindBySlugAsync(string slug);
     Task Remove(Post post);
-    Task AddCategorieByPost(Post post, List<Guid> Ids);
+    Task AddCategorieByPost(Post post, List<string> Ids);
 
 }
