@@ -53,4 +53,18 @@ public class PostRepository(MongoDbContext context) : IPostRepository
         await _posts.ReplaceOneAsync(x => x.Id == postEntity.Id, postEntity);
         return postEntity;
     }
+
+    // Phương thức lấy bài viết với phân trang và tìm kiếm
+    public async Task<long> GetTotalItemsAsync(FilterDefinition<Post.Domain.AggregatesModel.PostAggregate.Post> filter)
+    {
+        return await _posts.CountDocumentsAsync(filter);
+    }
+
+    public async Task<List<Post.Domain.AggregatesModel.PostAggregate.Post>> GetPostsAsync(FilterDefinition<Post.Domain.AggregatesModel.PostAggregate.Post> filter, int skip, int limit)
+    {
+        return await _posts.Find(filter)
+                             .Skip(skip)
+                             .Limit(limit)
+                             .ToListAsync();
+    }
 }

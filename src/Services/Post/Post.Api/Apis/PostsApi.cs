@@ -6,6 +6,7 @@ using Post.Api.Applications.Commands.Comment;
 using Post.Api.Applications.Commands.Post;
 using Post.Api.Applications.Commands.User;
 using Post.Api.Applications.Queries.Category;
+using Post.Api.Models;
 using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.UserAggregate;
 using static Contracts.Helper.DateTimeHelper;
@@ -44,7 +45,7 @@ public static class PostsApi
 
         api.MapGet("/{id}", GetPostByIdAsync);
         api.MapGet("/get-by-slug/{slug}", GetPostBySlugAsync);
-        //api.MapPost("/paging", GetsPostAsync);
+        api.MapPost("/paging", GetsPostAsync);
 
         return api;
     }
@@ -186,57 +187,14 @@ public static class PostsApi
         return TypedResults.Ok(result);
     }
 
-    //public static async Task<Ok<PaginatedItems<PostDto>>> GetsPostAsync(
-    //    [AsParameters] PaginationRequest paginationRequest,
-    //    [AsParameters] PostServices services,
-    //    [FromBody] SearchPostRequest request)
-    //{
-    //    var pageSize = paginationRequest.PageSize;
-    //    var pageIndex = paginationRequest.PageIndex;
-    //    var offSet = pageIndex * pageSize - pageSize;
-
-    //    var totalItems = await services.Context.Posts
-    //        .Where
-    //        (
-    //           c => (!request.CategoryId.HasValue || c.Categories.Any(x => (x.Id == request.CategoryId))) &&
-    //                (string.IsNullOrEmpty(request.Slug) || c.Categories.Any(x => (x.Slug.StartsWith(request.Slug)))) &&
-    //                (string.IsNullOrEmpty(request.Title) || c.Title.StartsWith(request.Title))
-    //        )
-    //        .LongCountAsync();
-
-    //    var itemsOnPage = await services.Context.Posts
-    //        .Where
-    //        (
-    //           c => (c.Categories.Any(x => (!request.CategoryId.HasValue || x.Id == request.CategoryId))) &&
-    //                (string.IsNullOrEmpty(request.Slug) || c.Categories.Any(x => (x.Slug.StartsWith(request.Slug)))) &&
-    //                (string.IsNullOrEmpty(request.Title) || c.Title.StartsWith(request.Title))
-    //        ).Skip(offSet)
-    //        .Take(pageSize)
-    //        .Include(x => x.Categories)
-    //        .Select(x => new PostDto
-    //        {
-    //            Slug = x.Slug,
-    //            Title = x.Title,
-    //            Description = x.Description,
-    //            ImageUrl = x.ImageUrl,
-    //            Id = x.Id,
-    //            CreatedDate = x.CreatedDate,
-    //            Categories = x.Categories.Select(c => new CategoryDto
-    //            {
-    //                Id = c.Id,
-    //                TagName = c.TagName,
-    //                Title = c.Title,
-    //            }).ToList(),
-    //        })
-    //        .ToListAsync();
-
-    //    foreach (var item in itemsOnPage)
-    //    {
-    //        item.Description = ShortenDescription(item.Description, 200);
-    //    }
-
-    //    return TypedResults.Ok(new PaginatedItems<PostDto>(pageIndex, pageSize, totalItems, itemsOnPage));
-    //}
+    public static async Task<Ok<PaginatedItems<PostDto>>> GetsPostAsync(
+        [AsParameters] PaginationRequest paginationRequest,
+        [AsParameters] PostServices services,
+        [FromBody] SearchPostRequest request)
+    {
+        var data = await services.PostQueries.GetPostsAsync(paginationRequest, request);
+        return TypedResults.Ok(data);
+    }
 
     private static string ShortenDescription(string description, int maxLength)
     {
@@ -347,14 +305,14 @@ public record CreateUserRequest(
 
 
 public record SearchPostRequest(
-    Guid? CategoryId,
+    string CategoryId,
     string Title,
     string Slug
 );
 
 public class PostDto
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
     public string ImageUrl { get; set; }
@@ -365,14 +323,14 @@ public class PostDto
 
 public class CategoryDto
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; }
     public string Title { get; set; }
     public string TagName { get; set; }
 }
 
 public class CommentDto
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; }
     public string Content { get; set; }
     public string Username { get; set; }
     public DateTime CreatedDate { get; set; }
