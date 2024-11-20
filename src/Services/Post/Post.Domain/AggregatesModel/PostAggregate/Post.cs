@@ -28,10 +28,10 @@ namespace Post.Domain.AggregatesModel.PostAggregate
 
         // Các danh sách liên kết đến Category và Comment
         [BsonElement("categories")]
-        public List<Category> Categories { get; set; }
+        public List<Category> Categories { get; set; } = [];
 
         [BsonElement("comments")]
-        public List<Comment> Comments { get; set; }
+        public List<Comment> Comments { get; set; } = [];
 
     }
 }

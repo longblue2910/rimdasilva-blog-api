@@ -8,4 +8,6 @@ public interface IPostQueries
     Task<Domain.AggregatesModel.PostAggregate.Post> FindByIdAsync(string id);
     Task<Domain.AggregatesModel.PostAggregate.Post> FindBySlugAsync(string slug);
     Task<PaginatedItems<PostDto>> GetPostsAsync(PaginationRequest paginationRequest, SearchPostRequest request);
+
+    Task<HomePostDto> GetHomePostAsync();
 }

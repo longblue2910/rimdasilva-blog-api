@@ -30,5 +30,8 @@ public class Category : MongoEntity
     public string TagName { get; set; }
 
     [BsonElement("posts")]
-    public List<PostAggregate.Post> Posts { get; set; }
+    public List<PostAggregate.Post> Posts { get; set; } = [];
+        [BsonElement("children")]
+    public List<Category> Children { get; set; } = [];
 }
+

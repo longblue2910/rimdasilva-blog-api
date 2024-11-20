@@ -26,50 +26,46 @@ public class PostContextSeed(MongoDbContext context)
         [
             new Category
             {
-                Title = "C#",
-                Slug = "csharp",
-                ImgUrl = "csharp.png",
+                Title = "News",
+                Slug = "news",
                 OrderIndex = 1,
-                TagName = "#CSharp"
+            },
+            new Category
+            {
+                Title = "Series",
+                Slug = "series",
+                OrderIndex = 2,
             },
             new Category
             {
                 Title = ".Net Core",
                 Slug = "netcore",
-                ImgUrl = "netcore.png",
-                OrderIndex = 2,
-                TagName = "#NetCore"
+                OrderIndex = 3,
             },
             new Category
             {
                 Title = "SQL",
                 Slug = "sql",
-                ImgUrl = "sql.png",
-                OrderIndex = 3,
-                TagName = "#SQL"
+                OrderIndex = 4,
+            },
+            new Category
+            {
+                Title = "SQL",
+                Slug = "sql",
+                OrderIndex = 5,
             },
             new Category
             {
                 Title = "DevOps",
                 Slug = "devops",
-                ImgUrl = "devops.png",
-                OrderIndex = 4,
-                TagName = "#DevOps"
+                OrderIndex = 6,
             },
             new Category
             {
-                Title = "Design",
-                Slug = "design",
-                ImgUrl = "design.png",
-                OrderIndex = 5,
-                TagName = "#Design"
-            },
-            new Category
-            {
-                Title = "Khác",
+                Title = "Azure",
                 Slug = "other",
                 ImgUrl = "other.png",
-                OrderIndex = 6,
+                OrderIndex = 7,
                 TagName = "#Khác"
             }
         ];

@@ -42,6 +42,7 @@ public static class PostsApi
 
         api.MapPost("/", CreatePostAsync).DisableAntiforgery();
         api.MapPut("/", UpdatePostAsync).DisableAntiforgery();
+        api.MapDelete("/", DeletePostAsync);
 
         api.MapGet("/{id}", GetPostByIdAsync);
         api.MapGet("/get-by-slug/{slug}", GetPostBySlugAsync);
@@ -196,6 +197,16 @@ public static class PostsApi
         return TypedResults.Ok(data);
     }
 
+    public static async Task<Ok<string>> DeletePostAsync(
+        [AsParameters] PostServices services,
+        [FromQuery] string id)
+    {
+        var command = new DeletePostCommand { Id = id };
+
+        var data = await services.Mediator.Send(command);
+        return TypedResults.Ok(data);
+    }
+
     private static string ShortenDescription(string description, int maxLength)
     {
 
@@ -303,12 +314,12 @@ public record CreateUserRequest(
     UserType UserType
 );
 
-
-public record SearchPostRequest(
-    string CategoryId,
-    string Title,
-    string Slug
-);
+public class SearchPostRequest
+{
+    public List<string> CategoryIds { get; set; } = [];
+    public string Title { get; set; }
+    public string Slug { get; set; }
+}
 
 public class PostDto
 {
@@ -336,3 +347,16 @@ public class CommentDto
     public DateTime CreatedDate { get; set; }
     public string CreatedDateStr => CreatedDate.ConvertToAgoString();
 }
+
+/// <summary>
+/// Danh sách bài viết hiển thị ở trang chủ
+/// </summary>
+public class HomePostDto
+{
+    public PostDto LatestNews { get; set; }
+    public List<PostDto> LatestBlog { get; set; } = [];
+    public List<PostDto> MostRead { get; set; } = [];
+
+}
+
+

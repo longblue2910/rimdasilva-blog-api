@@ -19,6 +19,11 @@ public class PostQueries(IPostRepository repository) : IPostQueries
         return await _repository.FindBySlugAsync(slug);
     }
 
+    public Task<HomePostDto> GetHomePostAsync()
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<PaginatedItems<PostDto>> GetPostsAsync(PaginationRequest paginationRequest, SearchPostRequest request)
     {
         var pageSize = paginationRequest.PageSize;
@@ -29,9 +34,10 @@ public class PostQueries(IPostRepository repository) : IPostQueries
         var filter = Builders<Domain.AggregatesModel.PostAggregate.Post>.Filter.Empty;
 
         // Lọc theo CategoryId nếu có
-        if (!string.IsNullOrEmpty(request.CategoryId))
+        if (request.CategoryIds.Count != 0)
         {
-            filter = filter & Builders<Domain.AggregatesModel.PostAggregate.Post>.Filter.ElemMatch(post => post.Categories, category => category.Id == request.CategoryId);
+            filter = filter & Builders<Domain.AggregatesModel.PostAggregate.Post>
+                .Filter.ElemMatch(post => post.Categories, category => request.CategoryIds.Contains(category.Id));
         }
 
         // Lọc theo Title nếu có
