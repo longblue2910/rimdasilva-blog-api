@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Contracts.Configurations;
+using Contracts.Exceptions;
 using MediatR;
 using Post.Domain.AggregatesModel.PostAggregate;
 
@@ -12,7 +13,13 @@ public class CreatePostCommandHandler(IPostRepository repository, IMapper mapper
 
     public async Task<bool> Handle(CreatePostCommand request, CancellationToken cancellationToken)
     {
-        var postEntity = _mapper.Map<Domain.AggregatesModel.PostAggregate.Post>(request);
+         var postEntity = _mapper.Map<Domain.AggregatesModel.PostAggregate.Post>(request);
+        postEntity.CountWatch = 0;
+
+
+        // Kiểm tra nếu title đã tồn tại
+        var existingPost = await _repository.FindBySlugAsync(request.Slug);
+        if (existingPost != null) throw new BadRequestException($"A post with the slug '{request.Slug}' already exists.");
 
         #region Upload image
 

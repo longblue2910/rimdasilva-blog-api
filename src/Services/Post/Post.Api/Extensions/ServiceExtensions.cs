@@ -1,12 +1,8 @@
 ﻿using Asp.Versioning;
-using Contracts.Configurations;
 using Contracts.Identity;
-using Contracts.Responses;
 using Core.Attributes;
 using eShop.Ordering.API.Application.Behaviors;
-using FluentValidation;
-using FluentValidation.AspNetCore;
-using MassTransit;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
 using Post.Api.Application.Behaviors;
 using Post.Api.Applications.Queries.Post;
@@ -25,13 +21,14 @@ public static class ServiceExtensions
         services.AddEndpointsApiExplorer();
 
         services.AddSwaggerGen();
+        services.AddOptions();
 
         services.Configure<RouteOptions>(options
                 => options.LowercaseQueryStrings = true);
 
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        //services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         // Configure mediatR
         services.AddMediatR(cfg =>
@@ -44,19 +41,14 @@ public static class ServiceExtensions
 
         services.AddScoped<IPostQueries, PostQueries>();
 
-        services.AddHttpContextAccessor();
 
-        //Global filter
-        services.AddMvc(options =>
+        //Common config
+        services.AddControllers(config =>
         {
-            options.Filters.Add(typeof(HttpGlobalExceptionFilter));
-        }).AddFluentValidation(s =>
-        {
-            _ = s.RegisterValidatorsFromAssemblyContaining<Program>();
-        }).ConfigureApiBehaviorOptions(options =>
-        {
-            options.InvalidModelStateResponseFactory = CustomFluentResponse.FluentValidationResponse;
+            config.Filters.Add(new ValidateModelAttribute());
         });
+
+        services.AddHttpContextAccessor();
     }
 
     internal static void AddConfigurationSettings(this IServiceCollection services,

@@ -16,6 +16,8 @@ namespace Post.Domain.AggregatesModel.PostAggregate
 
         [BsonElement("title")]
         public string Title { get; set; }
+        [BsonElement("descriptionShort")]
+        public string DescriptionShort { get; set; } // Tiêu đề phụ
 
         [BsonElement("description")]
         public string Description { get; set; }
@@ -25,6 +27,9 @@ namespace Post.Domain.AggregatesModel.PostAggregate
 
         [BsonElement("slug")]
         public string Slug { get; set; }
+
+        [BsonElement("countWatch")]
+        public int? CountWatch { get; set; }
 
         // Các danh sách liên kết đến Category và Comment
         [BsonElement("categories")]

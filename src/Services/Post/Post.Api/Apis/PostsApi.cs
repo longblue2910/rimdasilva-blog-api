@@ -1,4 +1,5 @@
-﻿using Infrastructure.Extensions;
+﻿using Contracts.Common.Responses;
+using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Post.Api.Applications.Commands.Categories;
@@ -7,7 +8,6 @@ using Post.Api.Applications.Commands.Post;
 using Post.Api.Applications.Commands.User;
 using Post.Api.Applications.Queries.Category;
 using Post.Api.Models;
-using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.UserAggregate;
 using static Contracts.Helper.DateTimeHelper;
 
@@ -47,6 +47,8 @@ public static class PostsApi
         api.MapGet("/{id}", GetPostByIdAsync);
         api.MapGet("/get-by-slug/{slug}", GetPostBySlugAsync);
         api.MapPost("/paging", GetsPostAsync);
+
+        api.MapGet("/home", GetsHomePostAsync);
 
         return api;
     }
@@ -103,20 +105,20 @@ public static class PostsApi
 
     #region Category endpoint
 
-    public static async Task<Ok<List<Category>>> GetsCategoryAsync([AsParameters] PostServices services, int size)
+    public static async Task<Ok<ApiSuccessResponse>> GetsCategoryAsync([AsParameters] PostServices services, int size)
     {
         var query = new GetsCategoryQuery { Size = size };
         var result = await services.Mediator.Send(query);
 
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(new ApiSuccessResponse { Data = result });
     }
 
-    public static async Task<Results<Ok, BadRequest<string>>> CreateCategoryAsync(
+    public static async Task<Ok<ApiSuccessResponse>> CreateCategoryAsync(
     [FromForm] CreateCategoryCommand request,
     [AsParameters] PostServices services)
     {
-        _ = await services.Mediator.Send(request);
-        return TypedResults.Ok();
+        var result = await services.Mediator.Send(request);
+        return TypedResults.Ok(new ApiSuccessResponse { Data = result, Message = "Tạo bài viết thành công" });
     }
 
 
@@ -124,7 +126,7 @@ public static class PostsApi
 
     #region Post endpoint
 
-    public static async Task<Results<Ok, BadRequest<string>>> CreatePostAsync(
+    public static async Task<Results<Ok<ApiResponse>, BadRequest<ApiResponse>>> CreatePostAsync(
     [FromHeader(Name = "x-requestid")] Guid requestId,
     [FromForm] CreatePostCommand request,
     [AsParameters] PostServices services)
@@ -135,21 +137,35 @@ public static class PostsApi
             nameof(request.Title),
             request.Title);
 
-        var result = await services.Mediator.Send(request);
-
-        if (result)
+        try
         {
+            var result = await services.Mediator.Send(request);
+
             services.Logger.LogInformation("CreatePostCommand succeeded - RequestId: {RequestId}", requestId);
-        }
-        else
-        {
-            services.Logger.LogWarning("CreatePostCommand failed - RequestId: {RequestId}", requestId);
-        }
+            var successResponse = new ApiResponse
+            {
+                Message = "Tạo mới thành công",
+                Data = "Dữ liệu đã được tạo thành công."
+            };
 
-        return TypedResults.Ok();
+            return TypedResults.Ok(successResponse);
+        }
+        catch (Exception ex)
+        {
+            services.Logger.LogError(ex, "An error occurred while processing the CreatePostCommand - RequestId: {RequestId}", requestId);
+
+            var errorResponse = new ApiResponse
+            {
+                Message = "Lỗi hệ thống",
+                DeveloperMessage = ex.Message
+            };
+
+            return TypedResults.BadRequest(errorResponse);
+        }
     }
 
-    public static async Task<Results<Ok, BadRequest<string>>> UpdatePostAsync(
+
+    public static async Task<Results<Ok<ApiResponse>, BadRequest<ApiResponse>>> UpdatePostAsync(
     [FromHeader(Name = "x-requestid")] Guid requestId,
     [FromForm] UpdatePostCommand request,
     [AsParameters] PostServices services)
@@ -160,51 +176,56 @@ public static class PostsApi
             nameof(request.Title),
             request.Title);
 
-        var result = await services.Mediator.Send(request);
+        await services.Mediator.Send(request);
 
-        if (result)
+        var successResponse = new ApiResponse
         {
-            services.Logger.LogInformation("UpdatePostCommand succeeded - RequestId: {RequestId}", requestId);
-        }
-        else
-        {
-            services.Logger.LogWarning("UpdatePostCommand failed - RequestId: {RequestId}", requestId);
-        }
+            Message = "Update thành công",
+            Data = "Dữ liệu đã được update thành công."
+        };
 
-        return TypedResults.Ok();
+        return TypedResults.Ok(successResponse);
     }
 
 
 
-    public static async Task<Ok<Domain.AggregatesModel.PostAggregate.Post>> GetPostByIdAsync([AsParameters] PostServices services, string id)
+    public static async Task<Ok<ApiSuccessResponse>> GetPostByIdAsync([AsParameters] PostServices services, string id)
     {
         var result = await services.PostQueries.FindByIdAsync(id);
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(new ApiSuccessResponse { Data = result });
     }
 
-    public static async Task<Ok<Domain.AggregatesModel.PostAggregate.Post>> GetPostBySlugAsync([AsParameters] PostServices services, string slug)
+    public static async Task<Ok<ApiSuccessResponse>> GetPostBySlugAsync([AsParameters] PostServices services, string slug, bool? userWatch)
     {
-        var result = await services.PostQueries.FindBySlugAsync(slug);
-        return TypedResults.Ok(result);
+        var result = await services.PostQueries.FindBySlugAsync(slug, userWatch);
+        return TypedResults.Ok(new ApiSuccessResponse { Data = result });
     }
 
-    public static async Task<Ok<PaginatedItems<PostDto>>> GetsPostAsync(
+    public static async Task<Ok<ApiSuccessResponse>> GetsPostAsync(
         [AsParameters] PaginationRequest paginationRequest,
         [AsParameters] PostServices services,
         [FromBody] SearchPostRequest request)
     {
-        var data = await services.PostQueries.GetPostsAsync(paginationRequest, request);
-        return TypedResults.Ok(data);
+        var result = await services.PostQueries.GetPostsAsync(paginationRequest, request);
+        return TypedResults.Ok(new ApiSuccessResponse { Data = result });
     }
 
-    public static async Task<Ok<string>> DeletePostAsync(
+    public static async Task<Ok<ApiSuccessResponse>> GetsHomePostAsync(
+        [AsParameters] PostServices services)
+    {
+        var result = await services.PostQueries.GetHomePostAsync();
+        return TypedResults.Ok(new ApiSuccessResponse { Data = result });
+    }
+
+
+    public static async Task<Ok<ApiSuccessResponse>> DeletePostAsync(
         [AsParameters] PostServices services,
         [FromQuery] string id)
     {
         var command = new DeletePostCommand { Id = id };
 
-        var data = await services.Mediator.Send(command);
-        return TypedResults.Ok(data);
+        var result = await services.Mediator.Send(command);
+        return TypedResults.Ok(new ApiSuccessResponse { Data = result, Message = "Xóa bài viết thành công" });
     }
 
     private static string ShortenDescription(string description, int maxLength)
@@ -321,16 +342,7 @@ public class SearchPostRequest
     public string Slug { get; set; }
 }
 
-public class PostDto
-{
-    public string Id { get; set; }
-    public string Title { get; set; }
-    public string Description { get; set; }
-    public string ImageUrl { get; set; }
-    public string Slug { get; set; }
-    public DateTime? CreatedDate { get; set; }
-    public List<CategoryDto> Categories { get; set; } = [];
-}
+
 
 public class CategoryDto
 {
@@ -359,4 +371,13 @@ public class HomePostDto
 
 }
 
-
+public class PostDto
+{
+    public string Id { get; set; }
+    public string Title { get; set; }
+    public string DescriptionShort { get; set; }
+    public string ImageUrl { get; set; }
+    public string Slug { get; set; }
+    public DateTime? CreatedDate { get; set; }
+    public List<CategoryDto> Categories { get; set; } = [];
+}

@@ -62,7 +62,7 @@ public class PostContextSeed(MongoDbContext context)
             },
             new Category
             {
-                Title = "Azure",
+                Title = "Other",
                 Slug = "other",
                 ImgUrl = "other.png",
                 OrderIndex = 7,

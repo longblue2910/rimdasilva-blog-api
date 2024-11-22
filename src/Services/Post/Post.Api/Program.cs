@@ -24,6 +24,9 @@ builder.Services.AddTransient<PostContextSeed>();
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionHandlingMiddleware>(); 
+
+
 // Seed dữ liệu khi ứng dụng khởi động
 using (var scope = app.Services.CreateScope())
 {

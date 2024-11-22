@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using Contracts.Exceptions;
+using MongoDB.Driver;
 using Post.Domain.AggregatesModel.CategoryAggregate;
 using Post.Domain.AggregatesModel.PostAggregate;
 
@@ -6,14 +7,12 @@ namespace Post.Infrastructure.Repositories;
 
 public class PostRepository(MongoDbContext context) : IPostRepository
 {
-    private readonly IMongoCollection<Post.Domain.AggregatesModel.PostAggregate.Post> _posts = context.Posts;
+    private readonly IMongoCollection<Domain.AggregatesModel.PostAggregate.Post> _posts = context.Posts;
     private readonly IMongoCollection<Category> _categories = context.Categories;
 
     public async Task<Domain.AggregatesModel.PostAggregate.Post> Add(Post.Domain.AggregatesModel.PostAggregate.Post post)
     {
-        // Kiểm tra nếu title đã tồn tại
-        var existingPost = await _posts.Find(x => x.Title == post.Title).FirstOrDefaultAsync();
-        if (existingPost != null) throw new InvalidOperationException($"A post with the title '{post.Title}' already exists.");
+
 
         await _posts.InsertOneAsync(post);
         return post;
@@ -23,12 +22,26 @@ public class PostRepository(MongoDbContext context) : IPostRepository
     {
         var listCate = await _categories.Find(x => ids.Contains(x.Id)).ToListAsync();
 
-        foreach (var item in listCate)
+
+        if (postEntity.Categories == null)
         {
-            // Check if category already exists in post
-            var isExist = postEntity.Categories.Any(x => x.Id == item.Id);
-            if (!isExist) postEntity.Categories.Add(item);
+            foreach (var item in listCate)
+            {
+                postEntity.Categories.Add(item);
+            }
         }
+        else
+        {
+            foreach (var item in listCate)
+            {
+                // Check if category already exists in post
+                var isExist = postEntity.Categories.Any(x => x.Id == item.Id);
+                if (!isExist) postEntity.Categories.Add(item);
+            }
+        }
+
+        
+
 
         // Update post with new categories
         await _posts.ReplaceOneAsync(x => x.Id == postEntity.Id, postEntity);
@@ -67,5 +80,11 @@ public class PostRepository(MongoDbContext context) : IPostRepository
                              .Skip(skip)
                              .Limit(limit)
                              .ToListAsync();
+    }
+
+    public async Task IncrementViewCountAsync(string postId)
+    {
+        var update = Builders<Post.Domain.AggregatesModel.PostAggregate.Post>.Update.Inc(p => p.CountWatch, 1);
+        await _posts.UpdateOneAsync(p => p.Id == postId, update);
     }
 }

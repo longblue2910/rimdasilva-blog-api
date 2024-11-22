@@ -9,9 +9,7 @@ public class PostServices(
     IPostQueries postQueries
     )
 {
-
     public IPostQueries PostQueries { get; set; } = postQueries;
-
     public IMediator Mediator { get; set; } = mediator;
     public ILogger<PostServices> Logger { get; } = logger;
 }

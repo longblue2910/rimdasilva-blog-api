@@ -9,10 +9,9 @@ public interface IPostRepository
     Task<Post> FindBySlugAsync(string slug);
     Task Remove(Post post);
     Task AddCategorieByPost(Post post, List<string> Ids);
-
-    // Lấy tổng số bài viết thỏa mãn filter
+    // Lấy tổng số bài vết thỏa mãn filter
     Task<long> GetTotalItemsAsync(FilterDefinition<Post> filter);
-
     // Lấy các bài viết theo phân trang và filter
     Task<List<Post>> GetPostsAsync(FilterDefinition<Post> filter, int skip, int limit);
+    Task IncrementViewCountAsync(string postId);
 }
