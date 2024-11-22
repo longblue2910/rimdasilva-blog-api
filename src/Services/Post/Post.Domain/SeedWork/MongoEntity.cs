@@ -8,10 +8,8 @@ public abstract class MongoEntity
     [BsonRepresentation(BsonType.ObjectId)]
     [BsonElement("_id")]
     public virtual string Id { get; set; }
-    [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
     [BsonElement("createdDate")]
-    public DateTime CreatedDate { get; set; }
-    [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
     [BsonElement("lastModifiedDate")]
-    public DateTime? LastModifiedDate { get; set; }
+    public DateTime? LastModifiedDate { get; set; } = DateTime.Now;
 }

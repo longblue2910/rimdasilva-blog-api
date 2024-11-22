@@ -12,6 +12,7 @@ public interface IPostRepository
     // Lấy tổng số bài vết thỏa mãn filter
     Task<long> GetTotalItemsAsync(FilterDefinition<Post> filter);
     // Lấy các bài viết theo phân trang và filter
-    Task<List<Post>> GetPostsAsync(FilterDefinition<Post> filter, int skip, int limit);
+    Task<List<Post>> GetPostsAsync(FilterDefinition<Post> filter, int skip, int limit,
+    SortDefinition<Domain.AggregatesModel.PostAggregate.Post>? sort = null);
     Task IncrementViewCountAsync(string postId);
 }

@@ -16,7 +16,6 @@ public class CreatePostCommandHandler(IPostRepository repository, IMapper mapper
          var postEntity = _mapper.Map<Domain.AggregatesModel.PostAggregate.Post>(request);
         postEntity.CountWatch = 0;
 
-
         // Kiểm tra nếu title đã tồn tại
         var existingPost = await _repository.FindBySlugAsync(request.Slug);
         if (existingPost != null) throw new BadRequestException($"A post with the slug '{request.Slug}' already exists.");

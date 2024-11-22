@@ -74,13 +74,25 @@ public class PostRepository(MongoDbContext context) : IPostRepository
         return await _posts.CountDocumentsAsync(filter);
     }
 
-    public async Task<List<Post.Domain.AggregatesModel.PostAggregate.Post>> GetPostsAsync(FilterDefinition<Post.Domain.AggregatesModel.PostAggregate.Post> filter, int skip, int limit)
+    public async Task<List<Post.Domain.AggregatesModel.PostAggregate.Post>> GetPostsAsync(
+    FilterDefinition<Post.Domain.AggregatesModel.PostAggregate.Post> filter,
+    int skip,
+    int limit,
+    SortDefinition<Post.Domain.AggregatesModel.PostAggregate.Post>? sort = null)
     {
-        return await _posts.Find(filter)
-                             .Skip(skip)
-                             .Limit(limit)
-                             .ToListAsync();
+        var query = _posts.Find(filter);
+
+        // Áp dụng sắp xếp nếu có điều kiện sắp xếp
+        if (sort != null)
+        {
+            query = query.Sort(sort);
+        }
+
+        return await query.Skip(skip)
+                          .Limit(limit)
+                          .ToListAsync();
     }
+
 
     public async Task IncrementViewCountAsync(string postId)
     {

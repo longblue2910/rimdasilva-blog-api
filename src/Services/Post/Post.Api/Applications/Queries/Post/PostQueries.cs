@@ -25,24 +25,26 @@ public class PostQueries : IPostQueries
 
         // Lấy bài viết mới nhất với thể loại "News"
         var filterNews = Builders<Domain.AggregatesModel.PostAggregate.Post>.Filter.ElemMatch(p => p.Categories, c => c.Title == "News");
-        var latestNews = await _repository.GetPostsAsync(filterNews, 0, 1); // Lấy 1 bài viết
+        var latestNews = await _repository.GetPostsAsync(filterNews, 0, 1, Builders<Domain.AggregatesModel.PostAggregate.Post>.Sort.Descending(p => p.CreatedDate)); // Sắp xếp theo CreatedDate
 
         response.LatestNews = latestNews.FirstOrDefault() != null ? MapToPostDto(latestNews.FirstOrDefault()) : null;
 
-        // Lấy 5 bài viết mới nhất
-        var latestBlogFilter = Builders<Domain.AggregatesModel.PostAggregate.Post>.Filter.Empty;
-        var latestBlogs = await _repository.GetPostsAsync(latestBlogFilter, 0, 5);
+        // Lấy 5 bài viết mới nhất, không lấy bài viết có thể loại là "News"
+        var latestBlogFilter = Builders<Domain.AggregatesModel.PostAggregate.Post>.Filter.ElemMatch(p => p.Categories, c => c.Title != "News");
+        var latestBlogs = await _repository.GetPostsAsync(latestBlogFilter, 0, 5, Builders<Domain.AggregatesModel.PostAggregate.Post>.Sort.Descending(p => p.CreatedDate)); // Lọc bài viết mới nhất theo CreatedDate
 
         response.LatestBlog = latestBlogs.Select(MapToPostDto).ToList();
 
-        // Lấy 5 bài viết đọc nhiều nhất
-        var mostReadFilter = Builders<Domain.AggregatesModel.PostAggregate.Post>.Filter.Empty;
-        var mostReadPosts = await _repository.GetPostsAsync(mostReadFilter, 0, 5);
+        // Lấy 5 bài viết đọc nhiều nhất, không lấy bài viết có thể loại là "News"
+        var mostReadFilter = Builders<Domain.AggregatesModel.PostAggregate.Post>.Filter.ElemMatch(p => p.Categories, c => c.Title != "News");
+        var mostReadPosts = await _repository.GetPostsAsync(mostReadFilter, 0, 5, Builders<Domain.AggregatesModel.PostAggregate.Post>.Sort.Descending(p => p.CountWatch)); // Sắp xếp theo CountWatch (đọc nhiều nhất)
 
-        response.MostRead = mostReadPosts.OrderByDescending(p => p.CountWatch).Select(MapToPostDto).ToList();
+        response.MostRead = mostReadPosts.Select(MapToPostDto).ToList();
 
         return response;
     }
+
+
 
     // Phương thức để chuyển đổi từ Post thành PostDto
     private PostDto MapToPostDto(Domain.AggregatesModel.PostAggregate.Post post)
