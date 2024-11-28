@@ -365,7 +365,7 @@ public class CommentDto
 /// </summary>
 public class HomePostDto
 {
-    public PostDto LatestNews { get; set; }
+    public List<PostDto> LatestNews { get; set; } = [];
     public List<PostDto> LatestBlog { get; set; } = [];
     public List<PostDto> MostRead { get; set; } = [];
 
@@ -379,5 +379,6 @@ public class PostDto
     public string ImageUrl { get; set; }
     public string Slug { get; set; }
     public DateTime? CreatedDate { get; set; }
+    public int? CountWatch { get; set; }
     public List<CategoryDto> Categories { get; set; } = [];
 }

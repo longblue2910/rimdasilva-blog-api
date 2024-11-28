@@ -25,19 +25,19 @@ public class PostQueries : IPostQueries
 
         // Lấy bài viết mới nhất với thể loại "News"
         var filterNews = Builders<Domain.AggregatesModel.PostAggregate.Post>.Filter.ElemMatch(p => p.Categories, c => c.Title == "News");
-        var latestNews = await _repository.GetPostsAsync(filterNews, 0, 1, Builders<Domain.AggregatesModel.PostAggregate.Post>.Sort.Descending(p => p.CreatedDate)); // Sắp xếp theo CreatedDate
+        var latestNews = await _repository.GetPostsAsync(filterNews, 0, 4, Builders<Domain.AggregatesModel.PostAggregate.Post>.Sort.Descending(p => p.CreatedDate)); // Sắp xếp theo CreatedDate
 
-        response.LatestNews = latestNews.FirstOrDefault() != null ? MapToPostDto(latestNews.FirstOrDefault()) : null;
+        response.LatestNews = latestNews.Select(MapToPostDto).ToList();
 
         // Lấy 5 bài viết mới nhất, không lấy bài viết có thể loại là "News"
         var latestBlogFilter = Builders<Domain.AggregatesModel.PostAggregate.Post>.Filter.ElemMatch(p => p.Categories, c => c.Title != "News");
-        var latestBlogs = await _repository.GetPostsAsync(latestBlogFilter, 0, 5, Builders<Domain.AggregatesModel.PostAggregate.Post>.Sort.Descending(p => p.CreatedDate)); // Lọc bài viết mới nhất theo CreatedDate
+        var latestBlogs = await _repository.GetPostsAsync(latestBlogFilter, 0, 4, Builders<Domain.AggregatesModel.PostAggregate.Post>.Sort.Descending(p => p.CreatedDate)); // Lọc bài viết mới nhất theo CreatedDate
 
         response.LatestBlog = latestBlogs.Select(MapToPostDto).ToList();
 
         // Lấy 5 bài viết đọc nhiều nhất, không lấy bài viết có thể loại là "News"
         var mostReadFilter = Builders<Domain.AggregatesModel.PostAggregate.Post>.Filter.ElemMatch(p => p.Categories, c => c.Title != "News");
-        var mostReadPosts = await _repository.GetPostsAsync(mostReadFilter, 0, 5, Builders<Domain.AggregatesModel.PostAggregate.Post>.Sort.Descending(p => p.CountWatch)); // Sắp xếp theo CountWatch (đọc nhiều nhất)
+        var mostReadPosts = await _repository.GetPostsAsync(mostReadFilter, 0, 4, Builders<Domain.AggregatesModel.PostAggregate.Post>.Sort.Descending(p => p.CountWatch)); // Sắp xếp theo CountWatch (đọc nhiều nhất)
 
         response.MostRead = mostReadPosts.Select(MapToPostDto).ToList();
 
@@ -120,11 +120,12 @@ public class PostQueries : IPostQueries
             ImageUrl = post.ImageUrl,
             Slug = post.Slug,
             CreatedDate = post.CreatedDate,
+            CountWatch = post.CountWatch,
             Categories = post.Categories?.Select(c => new CategoryDto
             {
                 Id = c.Id,
                 Title = c.Title
-            }).ToList() ?? new List<CategoryDto>()
+            }).ToList() ?? []
         }).ToList();
 
         return new PaginatedItems<PostDto>(pageIndex, pageSize, totalItems, postDtos);
