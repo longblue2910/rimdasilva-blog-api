@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Contracts.Configurations;
+using Contracts.Exceptions;
 using MediatR;
 using Post.Domain.AggregatesModel.PostAggregate;
 
@@ -13,11 +14,13 @@ public class UpdatePostCommandHandler(IPostRepository repository, IMapper mapper
     public async Task<bool> Handle(UpdatePostCommand request, CancellationToken cancellationToken)
     {
         var postEntity = await _repository.FindByIdAsync(request.Id.ToString());
+
+        if (postEntity == null) throw new BadRequestException($"Post with the ID '{request.Id}' not exists.");
         postEntity = _mapper.Map(request, postEntity);
 
         #region Upload image
 
-        if (request.ImageFile.Length > 0)
+        if (request.ImageFile?.Length > 0)
         {
             string uploadImagesFolder = RootPathConfig.UploadPath.PathImagePost;
             if (!Directory.Exists(uploadImagesFolder))
