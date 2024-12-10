@@ -1,8 +1,14 @@
-﻿namespace Post.Domain.AggregatesModel.CourseAggregate;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using Post.Domain.SeedWork;
 
-public class CourseStudent : EntityAuditBase<Guid>
+namespace Post.Domain.AggregatesModel.CourseAggregate;
+
+public class CourseStudent : MongoEntity
 {
-    public Guid CourseId { get; set; }
-    public Guid StudentId { get; set; }
+    [BsonElement("courseId")]
+    public string CourseId { get; set; }
+
+    [BsonElement("userId")]
+    public string UserId { get; set; }
 
 }

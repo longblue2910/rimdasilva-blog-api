@@ -1,15 +1,22 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using Post.Domain.SeedWork;
 
 namespace Post.Domain.AggregatesModel.CourseAggregate;
 
-public class Section : EntityAuditBase<Guid>
+public class Section : MongoEntity
 {
+    public Section()
+    {
+        // Đặt CreatedDate
+        CreatedDate = DateTime.UtcNow;
+    }
+
+    [BsonElement("sectionName")]
     public string SectionName { get; set; }
 
-    public Guid CourseId { get; set; }
+    [BsonElement("courseId")]
+    public string CourseId { get; set; }
 
-    [ForeignKey("CourseId")]
-    public virtual Course Course { get; set; }
-
-    public virtual ICollection<Lesson> Lessons { get; set; }
+    [BsonElement("lessons")]
+    public virtual List<Lesson> Lessons { get; set; } = [];
 }

@@ -24,8 +24,6 @@ public static class PostsApi
         return api;
     }
 
-
-
     public static RouteGroupBuilder MapCategoriesApiV1(this IEndpointRouteBuilder app)
     {
         var api = app.MapGroup("api/category").HasApiVersion(1.0);

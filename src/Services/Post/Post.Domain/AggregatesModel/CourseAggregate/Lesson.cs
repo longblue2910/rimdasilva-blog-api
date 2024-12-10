@@ -1,18 +1,38 @@
-﻿namespace Post.Domain.AggregatesModel.CourseAggregate;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using Post.Domain.SeedWork;
 
-public class Lesson : EntityAuditBase<Guid>
+namespace Post.Domain.AggregatesModel.CourseAggregate;
+
+public class Lesson : MongoEntity
 {
+    public Lesson()
+    {
+        // Đặt CreatedDate
+        CreatedDate = DateTime.UtcNow;
+    }
+
+    [BsonElement("lessonName")]
     public string LessonName { get; set; }
 
-    /// <summary>
-    /// Loại bài học
-    /// </summary>
+    [BsonElement("lessonType")]
+
     public LessonType LessonType { get; set; }
 
+    [BsonElement("description")]
     public string Description { get; set; }
+
+    [BsonElement("videoUrl")]
     public string VideoUrl { get; set; }
+
+    [BsonElement("orderIndex")]
     public int OrderIndex { get; set; }
-    public virtual ICollection<Question> Questions { get; set; } = [];
+
+    [BsonElement("sectionId")]
+    public string SectionId { get; set; }
+
+    //[BsonElement("questions")]
+
+    //public virtual List<Question> Questions { get; set; } = [];
 }
 
 
